@@ -1,6 +1,16 @@
 <template>
   <div class="auth-page">
-    <div class="auth-card">
+    <img
+      class="auth-bg"
+      src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=serene%20fresh%20morning%20forest%20with%20soft%20sunlight%20rays%20through%20green%20leaves%20and%20dew%2C%20calm%20minimal%20nature%20photography%2C%20airy%20pastel%20mint%20tones&image_size=landscape_16_9"
+      alt=""
+    />
+    <div class="auth-brand">
+      <span class="auth-brand__dot">见</span>
+      <span>用户中心</span>
+    </div>
+
+    <div class="auth-card stagger">
       <h2>登录</h2>
       <p class="subtitle">欢迎回来，请登录你的账号</p>
 
@@ -8,12 +18,12 @@
 
       <form @submit.prevent="onSubmit">
         <div class="form-item">
-          <label>用户名</label>
-          <input v-model.trim="form.username" type="text" placeholder="请输入用户名" autocomplete="username" />
+          <label for="login-username">用户名</label>
+          <input id="login-username" v-model.trim="form.username" type="text" placeholder="请输入用户名" autocomplete="username" />
         </div>
         <div class="form-item">
-          <label>密码</label>
-          <input v-model="form.password" type="password" placeholder="请输入密码" autocomplete="current-password" />
+          <label for="login-password">密码</label>
+          <input id="login-password" v-model="form.password" type="password" placeholder="请输入密码" autocomplete="current-password" />
         </div>
         <button class="btn" type="submit" :disabled="loading">
           {{ loading ? '登录中...' : '登 录' }}
