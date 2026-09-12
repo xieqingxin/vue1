@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # ---------- OS ----------
 .DS_Store
 Thumbs.db
@@ -56,62 +55,3 @@ tmp/
 .env
 .env.local
 .env.*.local
-=======
-# ---------- OS ----------
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# ---------- IDE ----------
-.idea/
-*.iml
-*.ipr
-*.iws
-.vscode/
-.settings/
-.project
-.classpath
-
-# ---------- Java / Maven (end) ----------
-end/target/
-end/*.class
-end/*.jar
-end/!.mvn/wrapper/maven-wrapper.jar
-end/mvnw
-end/mvnw.cmd
-end/.mvn/
-end/build/
-end/out/
-end/hs_err_pid*
-end/replay_pid*
-
-# ---------- Node / Vite (front) ----------
-front/node_modules/
-front/dist/
-front/dist-ssr/
-front/.vite/
-front/coverage/
-front/.npm/
-front/.pnpm-store/
-front/*.local
-front/*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# ---------- Logs / temp ----------
-logs/
-*.log
-*.tmp
-temp/
-tmp/
-
-# ---------- npm cache (local) ----------
-.npm-cache/
-
-# ---------- Env ----------
-.env
-.env.local
-.env.*.local
->>>>>>> origin/dark
