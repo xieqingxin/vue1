@@ -15,3 +15,11 @@ export const uploadFile = (file) => {
 }
 
 export const listFiles = () => request.get('/files')
+
+export const createTask = (data) => request.post('/tasks', data)
+
+export const listTasks = () => request.get('/tasks')
+
+export const updateTaskStatus = (id, status) => request.put(`/tasks/${id}/status`, { status })
+
+export const deleteTask = (id) => request.delete(`/tasks/${id}`)

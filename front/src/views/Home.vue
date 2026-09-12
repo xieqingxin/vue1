@@ -18,60 +18,95 @@
     <main class="container">
       <div class="greeting stagger">
         <h1>{{ greeting }}，{{ user ? user.nickname || user.username : '' }}</h1>
-        <p>在这里管理你的资料与文件，文件内容保存在数据库中。</p>
+        <p>在这里创建任务、跟踪进度，每个任务都像一个订单。</p>
       </div>
 
-      <div class="layout">
-        <aside class="profile">
-          <h2 class="section-title">个人信息</h2>
-          <ul class="info-list" v-if="user">
-            <li><span>ID</span><b>{{ user.id }}</b></li>
-            <li><span>用户名</span><b>{{ user.username }}</b></li>
-            <li><span>昵称</span><b>{{ user.nickname || '-' }}</b></li>
-            <li><span>邮箱</span><b>{{ user.email || '-' }}</b></li>
-            <li><span>注册时间</span><b>{{ user.createdAt || '-' }}</b></li>
-          </ul>
-        </aside>
+      <!-- 添加任务 -->
+      <section class="panel create-panel">
+        <h2 class="section-title">添加任务</h2>
+        <div v-if="createError" class="msg error">{{ createError }}</div>
 
-        <section class="files">
-          <div class="files__head">
-            <h2 class="section-title">我的文件</h2>
-            <span class="files__count" v-if="files.length">{{ files.length }} 个文件</span>
+        <form class="create-form" @submit.prevent="onCreate">
+          <div class="form-item">
+            <label for="t-name">任务名</label>
+            <input id="t-name" v-model.trim="form.name" type="text" placeholder="例如：整理季度报表" maxlength="100" />
           </div>
+          <div class="form-item">
+            <label for="t-content">任务内容</label>
+            <input id="t-content" v-model.trim="form.content" type="text" placeholder="简要描述要做的事（选填）" maxlength="1000" />
+          </div>
+          <div class="form-grid">
+            <div class="form-item">
+              <label for="t-start">开始时间</label>
+              <input id="t-start" v-model="form.startTime" type="datetime-local" />
+            </div>
+            <div class="form-item">
+              <label for="t-end">结束时间</label>
+              <input id="t-end" v-model="form.endTime" type="datetime-local" />
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-item">
+              <label for="t-reward">完成奖励</label>
+              <div class="reward-input">
+                <span class="reward-prefix">¥</span>
+                <input id="t-reward" v-model="form.reward" type="number" min="0" step="0.01" placeholder="0.00" />
+              </div>
+            </div>
+            <div class="form-item form-item--action">
+              <button class="btn-create" type="submit" :disabled="creating">
+                {{ creating ? '提交中...' : '提交任务' }}
+              </button>
+            </div>
+          </div>
+        </form>
+      </section>
 
-          <div v-if="error" class="msg error">{{ error }}</div>
-          <div v-if="tip" class="msg success">{{ tip }}</div>
-
-          <div class="upload-row">
-            <input type="file" ref="fileInput" class="file-input" />
-            <button class="btn-sm" :disabled="uploading" @click="onUpload">
-              {{ uploading ? '上传中...' : '上传文件' }}
+      <!-- 任务列表 -->
+      <section class="task-section">
+        <div class="task-section__head">
+          <h2 class="section-title">全部任务</h2>
+          <div class="filters">
+            <button
+              v-for="f in filters"
+              :key="f.value"
+              class="filter-btn"
+              :class="{ active: filter === f.value }"
+              @click="filter = f.value"
+            >
+              {{ f.label }}
             </button>
           </div>
+        </div>
 
-          <table class="file-table" v-if="files.length">
-            <thead>
-              <tr>
-                <th>文件名</th>
-                <th>类型</th>
-                <th>大小</th>
-                <th>上传时间</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="f in files" :key="f.id">
-                <td class="cell-name">{{ f.name }}</td>
-                <td>{{ f.contentType || '-' }}</td>
-                <td>{{ formatSize(f.size) }}</td>
-                <td>{{ f.createdAt }}</td>
-                <td><a class="dl" :href="downloadUrl(f.id)" target="_blank">下载</a></td>
-              </tr>
-            </tbody>
-          </table>
-          <p v-else class="empty">暂无文件，选择文件后点击「上传文件」。</p>
-        </section>
-      </div>
+        <div v-if="listError" class="msg error">{{ listError }}</div>
+
+        <ul v-if="visibleTasks.length" class="task-list">
+          <li v-for="t in visibleTasks" :key="t.id" class="task-card" :class="{ done: t.status === 1 }">
+            <div class="task-card__main">
+              <div class="task-card__head">
+                <span class="task-status" :class="t.status === 1 ? 'is-done' : 'is-doing'">
+                  {{ t.status === 1 ? '已完成' : '进行中' }}
+                </span>
+                <h3 class="task-card__name">{{ t.name }}</h3>
+                <span class="task-card__reward">奖励 ¥{{ formatMoney(t.reward) }}</span>
+              </div>
+              <p v-if="t.content" class="task-card__content">{{ t.content }}</p>
+              <div class="task-card__meta">
+                <span>开始 {{ formatTime(t.startTime) }}</span>
+                <span class="dot">·</span>
+                <span>截止 {{ formatTime(t.endTime) }}</span>
+              </div>
+            </div>
+            <div class="task-card__actions">
+              <button v-if="t.status === 0" class="act act--done" @click="onToggle(t, 1)">标记完成</button>
+              <button v-else class="act" @click="onToggle(t, 0)">重新打开</button>
+              <button class="act act--danger" @click="onDelete(t)">删除</button>
+            </div>
+          </li>
+        </ul>
+        <p v-else class="empty">{{ tasks.length ? '该筛选条件下暂无任务' : '暂无任务，先在上方提交一个吧。' }}</p>
+      </section>
     </main>
   </div>
 </template>
@@ -79,20 +114,32 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { getProfile, uploadFile, listFiles } from '../api/user'
+import { getProfile, createTask, listTasks, updateTaskStatus, deleteTask } from '../api/user'
 import { useUserStore } from '../store/user'
 
 const router = useRouter()
 const store = useUserStore()
 
 const user = ref(store.user)
-const files = ref([])
-const uploading = ref(false)
-const error = ref('')
-const tip = ref('')
-const fileInput = ref(null)
+const tasks = ref([])
+const filter = ref('all')
+const creating = ref(false)
+const createError = ref('')
+const listError = ref('')
 
-const API_BASE = import.meta.env.DEV ? '/api' : ''
+const form = ref({ name: '', content: '', startTime: '', endTime: '', reward: '' })
+
+const filters = [
+  { label: '全部', value: 'all' },
+  { label: '进行中', value: 'doing' },
+  { label: '已完成', value: 'done' }
+]
+
+const visibleTasks = computed(() => {
+  if (filter.value === 'doing') return tasks.value.filter((t) => t.status === 0)
+  if (filter.value === 'done') return tasks.value.filter((t) => t.status === 1)
+  return tasks.value
+})
 
 const initial = computed(() => {
   const name = user.value ? user.value.nickname || user.value.username : ''
@@ -108,15 +155,14 @@ const greeting = computed(() => {
   return '晚上好'
 })
 
-function downloadUrl(id) {
-  return `${API_BASE}/files/download/${id}`
+function formatTime(t) {
+  if (!t) return '-'
+  return String(t).replace('T', ' ').slice(0, 16)
 }
 
-function formatSize(size) {
-  if (size == null) return '-'
-  if (size < 1024) return size + ' B'
-  if (size < 1024 * 1024) return (size / 1024).toFixed(1) + ' KB'
-  return (size / 1024 / 1024).toFixed(1) + ' MB'
+function formatMoney(v) {
+  const n = Number(v)
+  return Number.isFinite(n) ? n.toFixed(2) : '0.00'
 }
 
 async function loadProfile() {
@@ -125,37 +171,75 @@ async function loadProfile() {
     user.value = res.data
     store.setUser(res.data)
   } catch (e) {
-    error.value = e.message
+    listError.value = e.message
   }
 }
 
-async function loadFiles() {
+async function loadTasks() {
+  listError.value = ''
   try {
-    const res = await listFiles()
-    files.value = res.data || []
+    const res = await listTasks()
+    tasks.value = res.data || []
   } catch (e) {
-    error.value = e.message
+    listError.value = e.message
   }
 }
 
-async function onUpload() {
-  error.value = ''
-  tip.value = ''
-  const input = fileInput.value
-  if (!input || !input.files || !input.files[0]) {
-    error.value = '请先选择文件'
+async function onCreate() {
+  createError.value = ''
+  const f = form.value
+  if (!f.name) {
+    createError.value = '请填写任务名'
     return
   }
-  uploading.value = true
+  if (!f.startTime || !f.endTime) {
+    createError.value = '请选择开始时间和结束时间'
+    return
+  }
+  if (new Date(f.endTime) <= new Date(f.startTime)) {
+    createError.value = '结束时间必须晚于开始时间'
+    return
+  }
+  if (f.reward === '' || Number(f.reward) < 0 || !Number.isFinite(Number(f.reward))) {
+    createError.value = '请填写正确的完成奖励'
+    return
+  }
+  creating.value = true
   try {
-    await uploadFile(input.files[0])
-    tip.value = '上传成功'
-    input.value = ''
-    await loadFiles()
+    await createTask({
+      name: f.name,
+      content: f.content,
+      startTime: f.startTime.length === 16 ? f.startTime + ':00' : f.startTime,
+      endTime: f.endTime.length === 16 ? f.endTime + ':00' : f.endTime,
+      reward: Number(f.reward)
+    })
+    form.value = { name: '', content: '', startTime: '', endTime: '', reward: '' }
+    await loadTasks()
   } catch (e) {
-    error.value = e.message
+    createError.value = e.message
   } finally {
-    uploading.value = false
+    creating.value = false
+  }
+}
+
+async function onToggle(t, status) {
+  listError.value = ''
+  try {
+    await updateTaskStatus(t.id, status)
+    await loadTasks()
+  } catch (e) {
+    listError.value = e.message
+  }
+}
+
+async function onDelete(t) {
+  if (!window.confirm(`确定删除任务「${t.name}」吗？`)) return
+  listError.value = ''
+  try {
+    await deleteTask(t.id)
+    await loadTasks()
+  } catch (e) {
+    listError.value = e.message
   }
 }
 
@@ -166,7 +250,7 @@ function onLogout() {
 
 onMounted(() => {
   loadProfile()
-  loadFiles()
+  loadTasks()
 })
 </script>
 
@@ -201,7 +285,6 @@ onMounted(() => {
   gap: 10px;
   font-size: 16px;
   font-weight: 650;
-  letter-spacing: 0.01em;
   color: var(--ink);
 }
 
@@ -265,13 +348,13 @@ onMounted(() => {
 
 /* ---------- 布局 ---------- */
 .container {
-  max-width: 960px;
+  max-width: 860px;
   margin: 0 auto;
   padding: clamp(24px, 4vw, 44px) clamp(16px, 4vw, 24px) 64px;
 }
 
 .greeting {
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .greeting h1 {
@@ -286,196 +369,320 @@ onMounted(() => {
   color: var(--ink-soft);
 }
 
-.layout {
-  display: grid;
-  grid-template-columns: 250px minmax(0, 1fr);
-  gap: clamp(20px, 3vw, 36px);
-  align-items: start;
-}
-
 .section-title {
   font-size: 13px;
   font-weight: 650;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ink-faint);
-  margin-bottom: 14px;
 }
 
-/* ---------- 个人信息：纯排版，不用卡片 ---------- */
-.profile {
-  animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
-}
-
-.info-list {
-  list-style: none;
-  border-top: 1px solid var(--line);
-}
-
-.info-list li {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 2px;
-  border-bottom: 1px solid var(--line);
-  font-size: 13.5px;
-}
-
-.info-list li span {
-  color: var(--ink-faint);
-  flex-shrink: 0;
-}
-
-.info-list li b {
-  font-weight: 550;
-  color: var(--ink);
-  text-align: right;
-  word-break: break-all;
-}
-
-/* ---------- 文件区：唯一的交互容器 ---------- */
-.files {
+.panel {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
-  padding: clamp(18px, 2.6vw, 28px);
-  animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+  padding: clamp(18px, 2.6vw, 26px);
 }
 
-.files__head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+/* ---------- 添加任务 ---------- */
+.create-panel {
+  margin-bottom: 28px;
+  animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
 }
 
-.files__count {
-  font-size: 12.5px;
-  color: var(--ink-faint);
+.create-panel .section-title {
+  margin-bottom: 16px;
 }
 
-.upload-row {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin: 4px 0 18px;
+.create-form .form-item {
+  margin-bottom: 14px;
 }
 
-.file-input {
-  flex: 1;
-  min-width: 0;
+.create-form label {
+  display: block;
   font-size: 13px;
-  color: var(--ink-soft);
-  padding: 10px 12px;
-  border: 1px dashed #c9ddd6;
-  border-radius: 12px;
-  background: var(--canvas);
-  transition: border-color 0.18s, background 0.18s;
+  font-weight: 550;
+  margin-bottom: 6px;
+  color: var(--ink);
 }
 
-.file-input:hover {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
-
-.file-input::file-selector-button {
+.create-form input {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  font-size: 14px;
   font-family: inherit;
-  font-size: 12.5px;
-  margin-right: 10px;
-  padding: 6px 10px;
-  border: none;
-  border-radius: 8px;
-  background: var(--accent-soft);
-  color: var(--accent-deep);
-  cursor: pointer;
+  color: var(--ink);
+  background: var(--surface);
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
 }
 
-.btn-sm {
-  height: 40px;
-  padding: 0 18px;
+.create-form input:hover {
+  border-color: #c9ddd6;
+}
+
+.create-form input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(22, 160, 133, 0.12);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 14px;
+}
+
+.reward-input {
+  position: relative;
+}
+
+.reward-prefix {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: var(--ink-faint);
+  pointer-events: none;
+}
+
+.reward-input input {
+  padding-left: 28px;
+}
+
+.form-item--action {
+  display: flex;
+  align-items: flex-end;
+}
+
+.btn-create {
+  width: 100%;
+  height: 42px;
   border: none;
-  border-radius: 12px;
+  border-radius: 11px;
   background: var(--accent);
   color: #fff;
-  cursor: pointer;
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 600;
-  box-shadow: 0 6px 16px -8px rgba(22, 160, 133, 0.7);
+  cursor: pointer;
+  box-shadow: 0 8px 18px -10px rgba(22, 160, 133, 0.7);
   transition: background 0.18s, transform 0.18s;
-  flex-shrink: 0;
 }
 
-.btn-sm:hover:not(:disabled) {
+.btn-create:hover:not(:disabled) {
   background: var(--accent-deep);
   transform: translateY(-1px);
 }
 
-.btn-sm:disabled {
+.btn-create:disabled {
   opacity: 0.55;
   cursor: not-allowed;
   box-shadow: none;
 }
 
-.file-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13.5px;
+/* ---------- 任务列表 ---------- */
+.task-section {
+  animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both;
 }
 
-.file-table th,
-.file-table td {
-  text-align: left;
-  padding: 11px 10px;
-  border-bottom: 1px solid var(--line);
+.task-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-.file-table th {
+.filters {
+  display: inline-flex;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px;
+}
+
+.filter-btn {
+  border: none;
+  background: none;
+  font-size: 13px;
+  color: var(--ink-soft);
+  padding: 5px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+
+.filter-btn.active {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.task-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.task-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.18s, transform 0.18s, border-left-color 0.18s;
+}
+
+.task-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.task-card.done {
+  border-left-color: #94a3b8;
+  opacity: 0.75;
+}
+
+.task-card.done .task-card__name {
+  text-decoration: line-through;
   color: var(--ink-faint);
-  font-weight: 550;
-  font-size: 12.5px;
 }
 
-.file-table tbody tr {
-  transition: background 0.15s;
+.task-card__main {
+  min-width: 0;
 }
 
-.file-table tbody tr:hover {
+.task-card__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.task-status {
+  font-size: 11.5px;
+  font-weight: 650;
+  padding: 3px 9px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.task-status.is-doing {
   background: var(--accent-soft);
+  color: var(--accent-deep);
 }
 
-.file-table tbody tr:last-child td {
-  border-bottom: none;
+.task-status.is-done {
+  background: #eef2f6;
+  color: #64748b;
 }
 
-.cell-name {
-  font-weight: 550;
+.task-card__name {
+  font-size: 15.5px;
+  font-weight: 650;
   color: var(--ink);
-  max-width: 220px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.dl {
-  font-weight: 600;
-  font-size: 13px;
+.task-card__reward {
+  margin-left: auto;
+  font-size: 13.5px;
+  font-weight: 650;
   color: var(--accent-deep);
-  padding: 5px 12px;
+  background: var(--accent-soft);
+  padding: 3px 10px;
   border-radius: 999px;
-  border: 1px solid #bfe6dc;
-  transition: background 0.18s, color 0.18s;
+  flex-shrink: 0;
 }
 
-.dl:hover {
+.task-card__content {
+  margin-top: 6px;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.task-card__meta {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
+.task-card__meta .dot {
+  color: #cbd5d1;
+}
+
+.task-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.act {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+
+.act:hover {
+  border-color: var(--accent);
+  color: var(--accent-deep);
+}
+
+.act--done {
+  border-color: #bfe6dc;
+  color: var(--accent-deep);
+  background: var(--accent-soft);
+}
+
+.act--done:hover {
   background: var(--accent);
   color: #fff;
+}
+
+.act--danger:hover {
+  border-color: #ffd9c2;
+  color: var(--danger);
+  background: var(--danger-soft);
 }
 
 .empty {
   color: var(--ink-faint);
   font-size: 14px;
   text-align: center;
-  padding: 28px 0;
+  padding: 36px 0;
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: 14px;
 }
 
 .msg {
@@ -492,36 +699,27 @@ onMounted(() => {
   border: 1px solid #ffd9c2;
 }
 
-.msg.success {
-  background: var(--ok-soft);
-  color: var(--ok);
-  border: 1px solid #cdeed8;
-}
-
 .stagger > * {
   animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-@media (max-width: 720px) {
-  .layout {
+@media (max-width: 640px) {
+  .form-grid {
     grid-template-columns: 1fr;
   }
 
-  .profile {
-    order: 2;
-  }
-
-  .files {
-    order: 1;
-  }
-
-  .upload-row {
+  .task-card {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .btn-sm {
-    width: 100%;
+  .task-card__actions {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  .task-card__reward {
+    margin-left: 0;
   }
 }
 </style>

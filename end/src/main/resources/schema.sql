@@ -28,3 +28,19 @@ CREATE TABLE IF NOT EXISTS `file` (
     PRIMARY KEY (`id`),
     KEY `idx_user_id` (`user_id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT ='文件表（内容存库）';
+
+-- 任务表：每条任务类似一个订单，记录起止时间与完成奖励
+CREATE TABLE IF NOT EXISTS `task` (
+    `id`          BIGINT        NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `user_id`     BIGINT        NOT NULL COMMENT '所属用户 ID',
+    `name`        VARCHAR(100)  NOT NULL COMMENT '任务名',
+    `content`     VARCHAR(1000) DEFAULT NULL COMMENT '任务内容',
+    `start_time`  DATETIME      NOT NULL COMMENT '开始时间',
+    `end_time`    DATETIME      NOT NULL COMMENT '结束时间',
+    `reward`      DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '完成奖励',
+    `status`      TINYINT       NOT NULL DEFAULT 0 COMMENT '完成状态：0-进行中 1-已完成',
+    `created_at`  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at`  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_user_status` (`user_id`, `status`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT ='任务表';
