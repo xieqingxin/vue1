@@ -1,6 +1,16 @@
 <template>
   <div class="auth-page">
-    <div class="auth-card">
+    <img
+      class="auth-bg"
+      src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=fresh%20dewdrops%20on%20bright%20green%20monstera%20leaves%20in%20soft%20daylight%2C%20clean%20minimal%20botanical%20photography%2C%20light%20mint%20and%20white%20tones&image_size=landscape_16_9"
+      alt=""
+    />
+    <div class="auth-brand">
+      <span class="auth-brand__dot">见</span>
+      <span>用户中心</span>
+    </div>
+
+    <div class="auth-card auth-card--compact stagger">
       <h2>注册</h2>
       <p class="subtitle">创建一个新账号</p>
 
@@ -9,24 +19,28 @@
 
       <form @submit.prevent="onSubmit">
         <div class="form-item">
-          <label>用户名 <span style="color:#9ca3af">(3-20 位)</span></label>
-          <input v-model.trim="form.username" type="text" placeholder="请输入用户名" autocomplete="username" />
+          <label for="reg-username">用户名 <span class="hint">(3-20 位)</span></label>
+          <input id="reg-username" v-model.trim="form.username" type="text" placeholder="请输入用户名" autocomplete="username" />
         </div>
-        <div class="form-item">
-          <label>昵称</label>
-          <input v-model.trim="form.nickname" type="text" placeholder="选填，默认与用户名相同" />
+        <div class="form-grid">
+          <div class="form-item">
+            <label for="reg-nickname">昵称</label>
+            <input id="reg-nickname" v-model.trim="form.nickname" type="text" placeholder="选填" />
+          </div>
+          <div class="form-item">
+            <label for="reg-email">邮箱</label>
+            <input id="reg-email" v-model.trim="form.email" type="email" placeholder="选填" />
+          </div>
         </div>
-        <div class="form-item">
-          <label>邮箱</label>
-          <input v-model.trim="form.email" type="email" placeholder="选填" />
-        </div>
-        <div class="form-item">
-          <label>密码 <span style="color:#9ca3af">(6-32 位)</span></label>
-          <input v-model="form.password" type="password" placeholder="请输入密码" autocomplete="new-password" />
-        </div>
-        <div class="form-item">
-          <label>确认密码</label>
-          <input v-model="form.confirm" type="password" placeholder="请再次输入密码" autocomplete="new-password" />
+        <div class="form-grid">
+          <div class="form-item">
+            <label for="reg-password">密码 <span class="hint">(6-32 位)</span></label>
+            <input id="reg-password" v-model="form.password" type="password" placeholder="请输入密码" autocomplete="new-password" />
+          </div>
+          <div class="form-item">
+            <label for="reg-confirm">确认密码</label>
+            <input id="reg-confirm" v-model="form.confirm" type="password" placeholder="再次输入" autocomplete="new-password" />
+          </div>
         </div>
         <button class="btn" type="submit" :disabled="loading">
           {{ loading ? '注册中...' : '注 册' }}
