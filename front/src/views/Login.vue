@@ -1,7 +1,7 @@
 <template>
   <div class="auth-page">
     <div class="auth-card">
-      <h2>登录11111</h2>
+      <h2>登录</h2>
       <p class="subtitle">欢迎回来，请登录你的账号</p>
 
       <div v-if="error" class="msg error">{{ error }}</div>
