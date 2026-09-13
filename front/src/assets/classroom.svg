@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f3ead6"/>
+      <stop offset="1" stop-color="#e6d6b8"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b98a5a"/>
+      <stop offset="1" stop-color="#8a5f38"/>
+    </linearGradient>
+    <linearGradient id="board" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f6b52"/>
+      <stop offset="1" stop-color="#234f3d"/>
+    </linearGradient>
+    <linearGradient id="win" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#cdeafe"/>
+      <stop offset="1" stop-color="#9fd0f0"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff6d8" stop-opacity="0.75"/>
+      <stop offset="1" stop-color="#fff6d8" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="desk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c98d54"/>
+      <stop offset="1" stop-color="#a06a37"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 墙面与地板 -->
+  <rect width="1600" height="620" fill="url(#wall)"/>
+  <rect y="620" width="1600" height="280" fill="url(#floor)"/>
+  <rect y="612" width="1600" height="14" fill="#6f4a28" opacity="0.55"/>
+
+  <!-- 左侧窗户 -->
+  <g>
+    <rect x="70" y="120" width="300" height="360" rx="10" fill="#7a5230"/>
+    <rect x="86" y="136" width="268" height="328" fill="url(#win)"/>
+    <line x1="220" y1="136" x2="220" y2="464" stroke="#7a5230" stroke-width="10"/>
+    <line x1="86" y1="300" x2="354" y2="300" stroke="#7a5230" stroke-width="10"/>
+  </g>
+
+  <!-- 阳光光束 -->
+  <polygon points="354,150 1180,620 354,620" fill="url(#sun)"/>
+  <polygon points="354,260 900,620 354,620" fill="url(#sun)"/>
+
+  <!-- 黑板 -->
+  <g>
+    <rect x="520" y="120" width="640" height="330" rx="14" fill="#6f4a28"/>
+    <rect x="540" y="138" width="600" height="294" rx="6" fill="url(#board)"/>
+    <!-- 粉笔字 -->
+    <g stroke="#eaf3ee" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.85">
+      <line x1="580" y1="190" x2="760" y2="190"/>
+      <line x1="580" y1="230" x2="1080" y2="230"/>
+      <line x1="580" y1="270" x2="980" y2="270"/>
+      <line x1="580" y1="310" x2="1050" y2="310"/>
+    </g>
+    <g stroke="#f4d58d" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.9">
+      <line x1="580" y1="360" x2="720" y2="360"/>
+    </g>
+    <!-- 粉笔槽 -->
+    <rect x="540" y="432" width="600" height="12" rx="4" fill="#5a3a1e"/>
+  </g>
+
+  <!-- 时钟 -->
+  <g>
+    <circle cx="1320" cy="210" r="52" fill="#fbf7ee" stroke="#6f4a28" stroke-width="8"/>
+    <line x1="1320" y1="210" x2="1320" y2="176" stroke="#333" stroke-width="6" stroke-linecap="round"/>
+    <line x1="1320" y1="210" x2="1344" y2="222" stroke="#333" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <!-- 后排课桌 -->
+  <g opacity="0.9">
+    <g transform="translate(560,470)">
+      <rect x="0" y="0" width="180" height="26" rx="6" fill="url(#desk)"/>
+      <rect x="16" y="26" width="12" height="70" fill="#7a5230"/>
+      <rect x="152" y="26" width="12" height="70" fill="#7a5230"/>
+    </g>
+    <g transform="translate(820,470)">
+      <rect x="0" y="0" width="180" height="26" rx="6" fill="url(#desk)"/>
+      <rect x="16" y="26" width="12" height="70" fill="#7a5230"/>
+      <rect x="152" y="26" width="12" height="70" fill="#7a5230"/>
+    </g>
+    <g transform="translate(1080,470)">
+      <rect x="0" y="0" width="180" height="26" rx="6" fill="url(#desk)"/>
+      <rect x="16" y="26" width="12" height="70" fill="#7a5230"/>
+      <rect x="152" y="26" width="12" height="70" fill="#7a5230"/>
+    </g>
+  </g>
+
+  <!-- 前排课桌（更大） -->
+  <g>
+    <g transform="translate(520,640)">
+      <rect x="0" y="0" width="260" height="34" rx="8" fill="url(#desk)"/>
+      <rect x="22" y="34" width="16" height="120" fill="#7a5230"/>
+      <rect x="222" y="34" width="16" height="120" fill="#7a5230"/>
+      <rect x="70" y="-26" width="120" height="26" rx="4" fill="#f6efe0" stroke="#d8c9a8"/>
+    </g>
+    <g transform="translate(860,640)">
+      <rect x="0" y="0" width="260" height="34" rx="8" fill="url(#desk)"/>
+      <rect x="22" y="34" width="16" height="120" fill="#7a5230"/>
+      <rect x="222" y="34" width="16" height="120" fill="#7a5230"/>
+      <rect x="80" y="-22" width="100" height="22" rx="4" fill="#e9f0f6" stroke="#c3d3df"/>
+    </g>
+    <g transform="translate(1200,640)">
+      <rect x="0" y="0" width="260" height="34" rx="8" fill="url(#desk)"/>
+      <rect x="22" y="34" width="16" height="120" fill="#7a5230"/>
+      <rect x="222" y="34" width="16" height="120" fill="#7a5230"/>
+    </g>
+  </g>
+</svg>

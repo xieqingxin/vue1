@@ -1,6 +1,5 @@
 package com.example.end.entity;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /** 任务实体：每条任务类似一个订单 */
@@ -14,7 +13,7 @@ public class Task {
     private String type;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private BigDecimal reward;
+    private String reward;
     /** 0-进行中 1-已完成 2-已过期 */
     private Integer status;
     private LocalDateTime completedAt;
@@ -76,11 +75,11 @@ public class Task {
         this.endTime = endTime;
     }
 
-    public BigDecimal getReward() {
+    public String getReward() {
         return reward;
     }
 
-    public void setReward(BigDecimal reward) {
+    public void setReward(String reward) {
         this.reward = reward;
     }
 

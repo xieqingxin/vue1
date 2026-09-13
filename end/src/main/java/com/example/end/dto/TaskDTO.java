@@ -3,7 +3,6 @@ package com.example.end.dto;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /** 新建任务请求参数 */
@@ -26,9 +25,9 @@ public class TaskDTO {
     @NotNull(message = "结束时间不能为空")
     private LocalDateTime endTime;
 
-    @NotNull(message = "完成奖励不能为空")
-    @javax.validation.constraints.DecimalMin(value = "0", message = "完成奖励不能为负数")
-    private BigDecimal reward;
+    @NotBlank(message = "完成奖励不能为空")
+    @Size(max = 100, message = "完成奖励长度不能超过 100")
+    private String reward;
 
     public String getName() {
         return name;
@@ -70,11 +69,11 @@ public class TaskDTO {
         this.endTime = endTime;
     }
 
-    public BigDecimal getReward() {
+    public String getReward() {
         return reward;
     }
 
-    public void setReward(BigDecimal reward) {
+    public void setReward(String reward) {
         this.reward = reward;
     }
 }

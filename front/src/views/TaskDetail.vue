@@ -25,7 +25,7 @@
           <h1 class="hero__name stagger-item">{{ task.name }}</h1>
           <p v-if="task.content" class="hero__content stagger-item">{{ task.content }}</p>
           <div class="hero__reward stagger-item">
-            <span class="hero__reward-num">¥{{ formatMoney(task.reward) }}</span>
+            <span class="hero__reward-num">{{ task.reward }}</span>
             <span class="hero__reward-label">完成奖励</span>
           </div>
         </section>
@@ -182,11 +182,6 @@ let timer = null
 function formatTime(t) {
   if (!t) return '-'
   return String(t).replace('T', ' ').slice(0, 16)
-}
-
-function formatMoney(v) {
-  const n = Number(v)
-  return Number.isFinite(n) ? n.toFixed(2) : '0.00'
 }
 
 function formatDuration(ms) {

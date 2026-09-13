@@ -5,7 +5,6 @@ import com.example.end.dto.TaskDTO;
 import com.example.end.entity.Task;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -38,7 +37,7 @@ public class TaskService {
         task.setType(type);
         task.setStartTime(dto.getStartTime());
         task.setEndTime(dto.getEndTime());
-        task.setReward(dto.getReward() == null ? BigDecimal.ZERO : dto.getReward());
+        task.setReward(dto.getReward() == null ? "" : dto.getReward().trim());
         task.setStatus(0);
         return taskDao.insert(task);
     }
