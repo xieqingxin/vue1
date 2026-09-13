@@ -10,11 +10,14 @@ public class Task {
     private Long userId;
     private String name;
     private String content;
+    /** 任务类型：exercise-锻炼 work-工作 study-学习 life-生活 other-其他 */
+    private String type;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private BigDecimal reward;
-    /** 0-进行中 1-已完成 */
+    /** 0-进行中 1-已完成 2-已过期 */
     private Integer status;
+    private LocalDateTime completedAt;
     private LocalDateTime createdAt;
 
     public Long getId() {
@@ -49,6 +52,14 @@ public class Task {
         this.content = content;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public LocalDateTime getStartTime() {
         return startTime;
     }
@@ -79,6 +90,14 @@ public class Task {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public LocalDateTime getCompletedAt() {
+        return completedAt;
+    }
+
+    public void setCompletedAt(LocalDateTime completedAt) {
+        this.completedAt = completedAt;
     }
 
     public LocalDateTime getCreatedAt() {

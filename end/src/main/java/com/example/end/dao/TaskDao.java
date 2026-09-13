@@ -26,33 +26,37 @@ public class TaskDao {
         t.setUserId(rs.getLong("user_id"));
         t.setName(rs.getString("name"));
         t.setContent(rs.getString("content"));
+        t.setType(rs.getString("type"));
         Timestamp st = rs.getTimestamp("start_time");
         if (st != null) t.setStartTime(st.toLocalDateTime());
         Timestamp et = rs.getTimestamp("end_time");
         if (et != null) t.setEndTime(et.toLocalDateTime());
         t.setReward(rs.getBigDecimal("reward"));
         t.setStatus(rs.getInt("status"));
+        Timestamp ca = rs.getTimestamp("completed_at");
+        if (ca != null) t.setCompletedAt(ca.toLocalDateTime());
         Timestamp c = rs.getTimestamp("created_at");
         if (c != null) t.setCreatedAt(c.toLocalDateTime());
         return t;
     };
 
     private static final String COLS =
-            "id, user_id, name, content, start_time, end_time, reward, status, created_at";
+            "id, user_id, name, content, type, start_time, end_time, reward, status, completed_at, created_at";
 
     public Long insert(Task task) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(
-                    "INSERT INTO `task`(user_id, name, content, start_time, end_time, reward, status) VALUES(?,?,?,?,?,?,?)",
+                    "INSERT INTO `task`(user_id, name, content, type, start_time, end_time, reward, status) VALUES(?,?,?,?,?,?,?,?)",
                     Statement.RETURN_GENERATED_KEYS);
             ps.setLong(1, task.getUserId());
             ps.setString(2, task.getName());
             ps.setString(3, task.getContent());
-            ps.setTimestamp(4, Timestamp.valueOf(task.getStartTime()));
-            ps.setTimestamp(5, Timestamp.valueOf(task.getEndTime()));
-            ps.setBigDecimal(6, task.getReward());
-            ps.setInt(7, task.getStatus() == null ? 0 : task.getStatus());
+            ps.setString(4, task.getType() == null ? "other" : task.getType());
+            ps.setTimestamp(5, Timestamp.valueOf(task.getStartTime()));
+            ps.setTimestamp(6, Timestamp.valueOf(task.getEndTime()));
+            ps.setBigDecimal(7, task.getReward());
+            ps.setInt(8, task.getStatus() == null ? 0 : task.getStatus());
             return ps;
         }, keyHolder);
         Number key = keyHolder.getKey();
@@ -71,9 +75,26 @@ public class TaskDao {
                 MAPPER, userId);
     }
 
+    /** 更新状态；status=1 时记录完成时间 */
     public int updateStatus(Long id, Long userId, int status) {
+        if (status == 1) {
+            return jdbcTemplate.update(
+                    "UPDATE `task` SET status = ?, completed_at = NOW() WHERE id = ? AND user_id = ?", status, id, userId);
+        }
         return jdbcTemplate.update(
                 "UPDATE `task` SET status = ? WHERE id = ? AND user_id = ?", status, id, userId);
+    }
+
+    /** 将所有超过结束时间仍未完成的任务置为已过期，返回影响行数 */
+    public int markExpired() {
+        return jdbcTemplate.update(
+                "UPDATE `task` SET status = 2 WHERE status = 0 AND end_time < NOW()");
+    }
+
+    /** 将指定用户超过结束时间仍未完成的任务置为已过期 */
+    public int markExpiredByUser(Long userId) {
+        return jdbcTemplate.update(
+                "UPDATE `task` SET status = 2 WHERE status = 0 AND end_time < NOW() AND user_id = ?", userId);
     }
 
     public int delete(Long id, Long userId) {

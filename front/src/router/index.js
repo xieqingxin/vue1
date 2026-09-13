@@ -3,6 +3,8 @@ import { useUserStore } from '../store/user'
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import Home from '../views/Home.vue'
+import TaskDetail from '../views/TaskDetail.vue'
+import Profile from '../views/Profile.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -10,7 +12,9 @@ const router = createRouter({
     { path: '/', redirect: '/home' },
     { path: '/login', name: 'login', component: Login, meta: { guestOnly: true } },
     { path: '/register', name: 'register', component: Register, meta: { guestOnly: true } },
-    { path: '/home', name: 'home', component: Home, meta: { requiresAuth: true } }
+    { path: '/home', name: 'home', component: Home, meta: { requiresAuth: true } },
+    { path: '/task/:id', name: 'taskDetail', component: TaskDetail, meta: { requiresAuth: true } },
+    { path: '/profile', name: 'profile', component: Profile, meta: { requiresAuth: true } }
   ]
 })
 

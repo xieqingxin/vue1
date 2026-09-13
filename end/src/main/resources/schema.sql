@@ -31,16 +31,23 @@ CREATE TABLE IF NOT EXISTS `file` (
 
 -- 任务表：每条任务类似一个订单，记录起止时间与完成奖励
 CREATE TABLE IF NOT EXISTS `task` (
-    `id`          BIGINT        NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `user_id`     BIGINT        NOT NULL COMMENT '所属用户 ID',
-    `name`        VARCHAR(100)  NOT NULL COMMENT '任务名',
-    `content`     VARCHAR(1000) DEFAULT NULL COMMENT '任务内容',
-    `start_time`  DATETIME      NOT NULL COMMENT '开始时间',
-    `end_time`    DATETIME      NOT NULL COMMENT '结束时间',
-    `reward`      DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '完成奖励',
-    `status`      TINYINT       NOT NULL DEFAULT 0 COMMENT '完成状态：0-进行中 1-已完成',
-    `created_at`  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `updated_at`  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `id`           BIGINT        NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `user_id`      BIGINT        NOT NULL COMMENT '所属用户 ID',
+    `name`         VARCHAR(100)  NOT NULL COMMENT '任务名',
+    `content`      VARCHAR(1000) DEFAULT NULL COMMENT '任务内容',
+    `type`         VARCHAR(20)   NOT NULL DEFAULT 'other' COMMENT '任务类型：exercise-锻炼 work-工作 study-学习 life-生活 other-其他',
+    `start_time`   DATETIME      NOT NULL COMMENT '开始时间',
+    `end_time`     DATETIME      NOT NULL COMMENT '结束时间',
+    `reward`       DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '完成奖励',
+    `status`       TINYINT       NOT NULL DEFAULT 0 COMMENT '完成状态：0-进行中 1-已完成 2-已过期',
+    `completed_at` DATETIME      DEFAULT NULL COMMENT '完成时间',
+    `created_at`   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at`   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
     KEY `idx_user_status` (`user_id`, `status`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT ='任务表';
+
+-- 已有数据库的增量变更（重复执行会报"列已存在"，可忽略）：
+-- ALTER TABLE `task` ADD COLUMN `type` VARCHAR(20) NOT NULL DEFAULT 'other' COMMENT '任务类型' AFTER `content`;
+-- ALTER TABLE `task` ADD COLUMN `completed_at` DATETIME DEFAULT NULL COMMENT '完成时间' AFTER `status`;
+-- ALTER TABLE `task` MODIFY COLUMN `status` TINYINT NOT NULL DEFAULT 0 COMMENT '完成状态：0-进行中 1-已完成 2-已过期';
