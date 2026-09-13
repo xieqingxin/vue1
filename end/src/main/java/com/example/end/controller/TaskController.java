@@ -41,10 +41,12 @@ public class TaskController {
             m.put("id", t.getId());
             m.put("name", t.getName());
             m.put("content", t.getContent());
+            m.put("type", t.getType());
             m.put("startTime", t.getStartTime());
             m.put("endTime", t.getEndTime());
             m.put("reward", t.getReward());
             m.put("status", t.getStatus());
+            m.put("completedAt", t.getCompletedAt());
             m.put("createdAt", t.getCreatedAt());
             list.add(m);
         }

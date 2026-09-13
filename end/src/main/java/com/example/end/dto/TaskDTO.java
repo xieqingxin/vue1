@@ -16,6 +16,10 @@ public class TaskDTO {
     @Size(max = 1000, message = "任务内容长度不能超过 1000")
     private String content;
 
+    /** 任务类型：exercise-锻炼 work-工作 study-学习 life-生活 other-其他 */
+    @Size(max = 20, message = "任务类型长度不能超过 20")
+    private String type;
+
     @NotNull(message = "开始时间不能为空")
     private LocalDateTime startTime;
 
@@ -40,6 +44,14 @@ public class TaskDTO {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public LocalDateTime getStartTime() {
