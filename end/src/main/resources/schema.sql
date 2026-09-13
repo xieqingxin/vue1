@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `task` (
     `type`         VARCHAR(20)   NOT NULL DEFAULT 'other' COMMENT '任务类型：exercise-锻炼 work-工作 study-学习 life-生活 other-其他',
     `start_time`   DATETIME      NOT NULL COMMENT '开始时间',
     `end_time`     DATETIME      NOT NULL COMMENT '结束时间',
-    `reward`       DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '完成奖励',
+    `reward`       VARCHAR(100)  NOT NULL DEFAULT '' COMMENT '完成奖励',
     `status`       TINYINT       NOT NULL DEFAULT 0 COMMENT '完成状态：0-进行中 1-已完成 2-已过期',
     `completed_at` DATETIME      DEFAULT NULL COMMENT '完成时间',
     `created_at`   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -51,3 +51,4 @@ CREATE TABLE IF NOT EXISTS `task` (
 -- ALTER TABLE `task` ADD COLUMN `type` VARCHAR(20) NOT NULL DEFAULT 'other' COMMENT '任务类型' AFTER `content`;
 -- ALTER TABLE `task` ADD COLUMN `completed_at` DATETIME DEFAULT NULL COMMENT '完成时间' AFTER `status`;
 -- ALTER TABLE `task` MODIFY COLUMN `status` TINYINT NOT NULL DEFAULT 0 COMMENT '完成状态：0-进行中 1-已完成 2-已过期';
+-- ALTER TABLE `task` MODIFY COLUMN `reward` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '完成奖励';

@@ -31,7 +31,7 @@ public class TaskDao {
         if (st != null) t.setStartTime(st.toLocalDateTime());
         Timestamp et = rs.getTimestamp("end_time");
         if (et != null) t.setEndTime(et.toLocalDateTime());
-        t.setReward(rs.getBigDecimal("reward"));
+        t.setReward(rs.getString("reward"));
         t.setStatus(rs.getInt("status"));
         Timestamp ca = rs.getTimestamp("completed_at");
         if (ca != null) t.setCompletedAt(ca.toLocalDateTime());
@@ -55,7 +55,7 @@ public class TaskDao {
             ps.setString(4, task.getType() == null ? "other" : task.getType());
             ps.setTimestamp(5, Timestamp.valueOf(task.getStartTime()));
             ps.setTimestamp(6, Timestamp.valueOf(task.getEndTime()));
-            ps.setBigDecimal(7, task.getReward());
+            ps.setString(7, task.getReward());
             ps.setInt(8, task.getStatus() == null ? 0 : task.getStatus());
             return ps;
         }, keyHolder);
