@@ -8,15 +8,12 @@
 
     <header class="topbar">
       <div class="brand">
-        <span class="brand__dot">见</span>
-        <span>用户中心</span>
+        <span class="brand__dot" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </span>
+        <span>自律计划任务平台</span>
       </div>
       <div class="user-info">
-        <span class="avatar" aria-hidden="true" @click="router.push('/profile')">
-          <img v-if="user && user.avatar" :src="user.avatar" alt="avatar" />
-          <template v-else>{{ initial }}</template>
-        </span>
-        <span class="name">{{ user ? user.nickname || user.username : '' }}</span>
         <button class="link-btn" @click="router.push('/profile')">个人中心</button>
         <button class="link-btn" @click="onLogout">退出登录</button>
       </div>
@@ -25,7 +22,7 @@
     <main class="container">
       <div class="greeting stagger">
         <h1>{{ greeting }}，{{ user ? user.nickname || user.username : '' }}</h1>
-        <p>在这里创建任务、跟踪进度，每个任务都像一个订单。</p>
+        <p>在这里创建任务、跟踪进度，自律完成任务。</p>
       </div>
 
       <!-- 任务类型入口：点击标签进入对应的添加页面（便利贴样式） -->
@@ -39,7 +36,7 @@
           @click="router.push(`/add/${tp.value}`)"
         >
           <span class="entry__icon">{{ tp.icon }}</span>
-          <span class="entry__label">{{ tp.label }}</span>
+          <span class="entry__label">{{ tp.label }}任务</span>
           <span class="entry__plus">＋添加</span>
         </button>
       </div>
@@ -166,11 +163,6 @@ const visibleTasks = computed(() => {
   return list
 })
 
-const initial = computed(() => {
-  const name = user.value ? user.value.nickname || user.value.username : ''
-  return name ? name.charAt(0).toUpperCase() : '?'
-})
-
 const greeting = computed(() => {
   const h = new Date().getHours()
   if (h < 6) return '夜深了'
@@ -250,8 +242,8 @@ onMounted(() => {
 /* ---------- 顶栏 ---------- */
 .topbar {
   height: 62px;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
   display: flex;
   align-items: center;
@@ -279,39 +271,12 @@ onMounted(() => {
   color: #fff;
   display: grid;
   place-items: center;
-  font-size: 13px;
-  font-weight: 700;
 }
 
 .user-info {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: var(--accent-soft);
-  color: var(--accent-deep);
-  display: grid;
-  place-items: center;
-  font-size: 14px;
-  font-weight: 650;
-  cursor: pointer;
-}
-
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.name {
-  font-size: 14px;
-  color: var(--ink);
 }
 
 .link-btn {
@@ -341,6 +306,12 @@ onMounted(() => {
 
 .greeting {
   margin-bottom: 24px;
+  padding: 18px 22px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 6px 18px -10px rgba(30, 41, 59, 0.25);
 }
 
 .greeting h1 {
@@ -348,6 +319,7 @@ onMounted(() => {
   font-weight: 650;
   letter-spacing: -0.015em;
   margin-bottom: 8px;
+  color: var(--ink);
 }
 
 .greeting p {
@@ -360,7 +332,11 @@ onMounted(() => {
   font-weight: 650;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: var(--ink-soft);
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(8px);
 }
 
 .panel {

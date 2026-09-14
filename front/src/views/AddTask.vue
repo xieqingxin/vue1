@@ -337,8 +337,8 @@ onMounted(loadTasks)
 /* ---------- 顶栏 ---------- */
 .topbar {
   height: 62px;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
   display: flex;
   align-items: center;
@@ -568,6 +568,10 @@ onMounted(loadTasks)
   font-size: 15px;
   font-weight: 650;
   color: var(--ink);
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(8px);
 }
 
 .filters {
