@@ -39,7 +39,7 @@
       </div>
 
       <!-- 任务列表 -->
-      <section class="task-section">
+      <section class="task-section task-section--merged">
         <div class="task-section__head">
           <h2 class="section-title">全部任务</h2>
           <div class="filters">
@@ -432,6 +432,56 @@ onMounted(() => {
 /* ---------- 任务列表 ---------- */
 .task-section {
   animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both;
+}
+
+/* 全部任务合并为一张纸（与添加任务页同款表现，米色横线纸：红色装订线 + 紫色横线） */
+.task-section--merged {
+  --paper-border: #e6dfc8;
+  --paper-surface:
+    linear-gradient(90deg, transparent 0 26px, rgba(224, 138, 138, 0.5) 26px 27px, transparent 27px),
+    repeating-linear-gradient(transparent 0 27px, rgba(124, 58, 237, 0.1) 27px 28px),
+    #fffdf5;
+  --paper-divider: rgba(124, 58, 237, 0.34);
+  --paper-hover: rgba(124, 58, 237, 0.04);
+  --paper-shadow: 4px 6px 0 rgba(23, 50, 44, 0.14);
+  --paper-radius: 8px;
+}
+
+/* 纸张背景放在整个列表容器上，卡片自身透明 */
+.task-section--merged :deep(.task-list) {
+  border: 1px solid var(--paper-border);
+  border-radius: var(--paper-radius);
+  padding: 10px 14px 10px 10px;
+  gap: 0;
+  background: var(--paper-surface);
+  box-shadow: var(--paper-shadow);
+}
+
+/* 单张卡片不再各自成纸：去边框、去阴影、去倾斜 */
+.task-section--merged :deep(.task-list .task-card),
+.task-section--merged :deep(.task-list .task-card.done),
+.task-section--merged :deep(.task-list .task-card.expired) {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  transform: none;
+  padding: 18px 8px 18px 24px;
+}
+
+/* 卡片之间用虚线分隔，像纸上的折痕 */
+.task-section--merged :deep(.task-list li:not(:last-child) .task-card) {
+  border-bottom: 1.5px dashed var(--paper-divider);
+}
+
+.task-section--merged :deep(.task-list .task-card::before) {
+  display: none;
+}
+
+.task-section--merged :deep(.task-list .task-card:hover) {
+  transform: none;
+  box-shadow: none;
+  background: var(--paper-hover);
 }
 
 .task-section__head {

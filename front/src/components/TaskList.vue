@@ -38,33 +38,35 @@
     </ul>
     <p v-else class="empty">{{ emptyText }}</p>
 
-    <!-- 完成确认弹窗 -->
-    <div v-if="confirmTask" class="modal-mask" @click.self="closeConfirm">
-      <div class="modal" role="dialog" aria-modal="true">
-        <h3 class="modal__title">确认完成任务</h3>
-        <p class="modal__text">
-          任务「<strong>{{ confirmTask.name }}</strong>」确认任务是否成？。
-        </p>
-        <div class="modal__actions">
-          <button class="act" @click="closeConfirm">取消</button>
-          <button class="act act--done" :disabled="completing" @click="confirmComplete">
-            {{ completing ? '提交中...' : '确认完成' }}
-          </button>
+    <!-- 完成确认弹窗（Teleport 到 body，保证在最上层） -->
+    <Teleport to="body">
+      <div v-if="confirmTask" class="modal-mask" @click.self="closeConfirm">
+        <div class="modal" role="dialog" aria-modal="true">
+          <h3 class="modal__title">确认完成任务</h3>
+          <p class="modal__text">
+            任务「<strong>{{ confirmTask.name }}</strong>」确认任务是否成？。
+          </p>
+          <div class="modal__actions">
+            <button class="act" @click="closeConfirm">取消</button>
+            <button class="act act--done" :disabled="completing" @click="confirmComplete">
+              {{ completing ? '提交中...' : '确认完成' }}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- 完成鼓励弹窗 -->
-    <div v-if="praiseText" class="modal-mask" @click.self="closePraise">
-      <div class="modal modal--praise" role="dialog" aria-modal="true">
-        <div class="praise__icon" aria-hidden="true">🎉</div>
-        <h3 class="modal__title">任务完成！</h3>
-        <p class="modal__text praise__text">{{ praiseText }}</p>
-        <div class="modal__actions">
-          <button class="act act--done" @click="closePraise">太棒了</button>
+      <!-- 完成鼓励弹窗 -->
+      <div v-if="praiseText" class="modal-mask" @click.self="closePraise">
+        <div class="modal modal--praise" role="dialog" aria-modal="true">
+          <div class="praise__icon" aria-hidden="true">🎉</div>
+          <h3 class="modal__title">任务完成！</h3>
+          <p class="modal__text praise__text">{{ praiseText }}</p>
+          <div class="modal__actions">
+            <button class="act act--done" @click="closePraise">太棒了</button>
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 
