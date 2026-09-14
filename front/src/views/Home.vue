@@ -127,12 +127,10 @@ import { useRouter } from 'vue-router'
 import { getProfile, listTasks } from '../api/user'
 import { useUserStore } from '../store/user'
 import TaskList from '../components/TaskList.vue'
+import sceneImg from '../assets/bg/home.jpg' // 主页场景背景：桌面俯拍实景（与添加页同风格）
 
 const router = useRouter()
 const store = useUserStore()
-
-// 主页场景背景：桌面俯拍的实景照片（与添加页同一风格）
-const sceneImg = 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=1920&q=80&auto=format&fit=crop'
 
 const user = ref(store.user)
 const tasks = ref([])

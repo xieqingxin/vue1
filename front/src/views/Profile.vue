@@ -95,6 +95,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { listTasks } from '../api/user'
 import { useUserStore } from '../store/user'
+import sceneImg from '../assets/bg/profile.jpg' // 个人中心场景背景：明亮书桌俯拍实景
 
 const router = useRouter()
 const store = useUserStore()
@@ -102,9 +103,6 @@ const store = useUserStore()
 const user = ref(store.user)
 const tasks = ref([])
 const loadError = ref('')
-
-// 个人中心场景背景：明亮书桌俯拍实景
-const sceneImg = 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=1920&q=80&auto=format&fit=crop'
 
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六']
 

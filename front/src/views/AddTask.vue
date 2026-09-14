@@ -92,18 +92,11 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createTask, listTasks } from '../api/user'
 import TaskList from '../components/TaskList.vue'
+// 各类型场景背景：明亮的实景照片（本地资源，见 src/assets/scenes.js）
+import { SCENE_IMGS } from '../assets/scenes'
 
 const route = useRoute()
 const router = useRouter()
-
-// 各类型场景背景：明亮的实景照片
-const SCENE_IMGS = {
-  exercise: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1920&q=80&auto=format&fit=crop', // 健身房
-  work: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=80&auto=format&fit=crop', // 现代办公室
-  study: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=1920&q=80&auto=format&fit=crop', // 图书馆书架
-  life: 'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=1920&q=80&auto=format&fit=crop', // 明亮厨房
-  other: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1920&q=80&auto=format&fit=crop' // 安静会议室
-}
 
 // 任务类型定义（与首页保持一致）
 const TASK_TYPES = [

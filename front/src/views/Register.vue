@@ -2,7 +2,7 @@
   <div class="auth-page">
     <img
       class="auth-bg"
-      src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=fresh%20dewdrops%20on%20bright%20green%20monstera%20leaves%20in%20soft%20daylight%2C%20clean%20minimal%20botanical%20photography%2C%20light%20mint%20and%20white%20tones&image_size=landscape_16_9"
+      :src="bgImg"
       alt=""
     />
     <div class="auth-brand">
@@ -60,6 +60,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { register } from '../api/user'
+import bgImg from '../assets/bg/register.jpg' // 注册页背景：龟背竹露珠实景（本地资源）
 
 const router = useRouter()
 
