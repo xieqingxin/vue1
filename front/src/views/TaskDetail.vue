@@ -10,8 +10,10 @@
       <div class="topbar__left">
         <button class="back-btn" @click="goBack">← 返回任务列表</button>
         <div class="brand">
-          <span class="brand__dot">见</span>
-          <span>用户中心</span>
+          <span class="brand__dot" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </span>
+          <span>自律计划任务平台</span>
         </div>
       </div>
     </header>
@@ -87,7 +89,7 @@
 
         <!-- 操作区 -->
         <section class="actions">
-          <button class="btn btn--danger" @click="onDelete">删除任务</button>
+          <button class="btn btn--danger" @click="askDelete">删除任务</button>
           <button v-if="task.status === 0" class="btn btn--primary" :disabled="completing" @click="askComplete">
             {{ completing ? '提交中...' : '任务完成' }}
           </button>
@@ -104,6 +106,20 @@
           <button class="btn btn--ghost" @click="closeConfirm">取消</button>
           <button class="btn btn--primary" :disabled="completing" @click="confirmComplete">
             {{ completing ? '提交中...' : '确认完成' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 删除确认弹窗（与完成确认同款样式） -->
+    <div v-if="showDeleteConfirm" class="modal-mask" @click.self="closeDelete">
+      <div class="modal" role="dialog" aria-modal="true">
+        <h3 class="modal__title">确认删除任务</h3>
+        <p class="modal__text">任务「<strong>{{ task ? task.name : '' }}</strong>」删除后不可恢复，确认删除吗？</p>
+        <div class="modal__actions">
+          <button class="btn btn--ghost" @click="closeDelete">取消</button>
+          <button class="btn btn--danger" :disabled="deleting" @click="confirmDelete">
+            {{ deleting ? '删除中...' : '确认删除' }}
           </button>
         </div>
       </div>
@@ -136,6 +152,8 @@ const loading = ref(true)
 const loadError = ref('')
 const showConfirm = ref(false)
 const completing = ref(false)
+const showDeleteConfirm = ref(false)
+const deleting = ref(false)
 const praiseText = ref('')
 const now = ref(Date.now())
 
@@ -267,14 +285,25 @@ function closePraise() {
   praiseText.value = ''
 }
 
-async function onDelete() {
+function askDelete() {
   if (!task.value) return
-  if (!window.confirm(`确定删除任务「${task.value.name}」吗？`)) return
+  showDeleteConfirm.value = true
+}
+
+function closeDelete() {
+  if (deleting.value) return
+  showDeleteConfirm.value = false
+}
+
+async function confirmDelete() {
+  if (!task.value || deleting.value) return
+  deleting.value = true
   try {
     await deleteTask(task.value.id)
     router.push('/home')
   } catch (e) {
     loadError.value = e.message
+    deleting.value = false
   }
 }
 
@@ -335,8 +364,8 @@ onUnmounted(() => {
 /* ---------- 顶栏 ---------- */
 .topbar {
   height: 62px;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
   display: flex;
   align-items: center;
@@ -370,8 +399,6 @@ onUnmounted(() => {
   color: #fff;
   display: grid;
   place-items: center;
-  font-size: 13px;
-  font-weight: 700;
 }
 
 .back-btn {

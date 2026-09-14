@@ -6,8 +6,10 @@
       alt=""
     />
     <div class="auth-brand">
-      <span class="auth-brand__dot">见</span>
-      <span>用户中心</span>
+      <span class="auth-brand__dot" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </span>
+      <span>自律计划任务平台</span>
     </div>
 
     <div class="auth-card auth-card--compact stagger">

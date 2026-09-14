@@ -31,7 +31,7 @@
         <!-- 操作区阻止冒泡，避免触发整卡跳转 -->
         <div class="task-card__actions" @click.stop>
           <button v-if="t.status === 0" class="act act--done" @click="askComplete(t)">标记完成</button>
-          <button class="act act--danger" @click="onDelete(t)">删除</button>
+          <button class="act act--danger" @click="askDelete(t)">删除</button>
         </div>
       </li>
     </ul>
@@ -49,6 +49,22 @@
             <button class="act" @click="closeConfirm">取消</button>
             <button class="act act--done" :disabled="completing" @click="confirmComplete">
               {{ completing ? '提交中...' : '确认完成' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 删除确认弹窗（与完成确认同款样式） -->
+      <div v-if="pendingDelete" class="modal-mask" @click.self="closeDelete">
+        <div class="modal" role="dialog" aria-modal="true">
+          <h3 class="modal__title">确认删除任务</h3>
+          <p class="modal__text">
+            任务「<strong>{{ pendingDelete.name }}</strong>」删除后不可恢复，确认删除吗？
+          </p>
+          <div class="modal__actions">
+            <button class="act" @click="closeDelete">取消</button>
+            <button class="act act--danger-solid" :disabled="deleting" @click="confirmDelete">
+              {{ deleting ? '删除中...' : '确认删除' }}
             </button>
           </div>
         </div>
@@ -86,6 +102,8 @@ const router = useRouter()
 const confirmTask = ref(null)
 const completing = ref(false)
 const praiseText = ref('')
+const pendingDelete = ref(null)
+const deleting = ref(false)
 
 // 任务类型定义（与首页保持一致）
 const taskTypes = [
@@ -159,13 +177,27 @@ function closePraise() {
   praiseText.value = ''
 }
 
-async function onDelete(t) {
-  if (!window.confirm(`确定删除任务「${t.name}」吗？`)) return
+function askDelete(t) {
+  pendingDelete.value = t
+}
+
+function closeDelete() {
+  if (deleting.value) return
+  pendingDelete.value = null
+}
+
+async function confirmDelete() {
+  const t = pendingDelete.value
+  if (!t || deleting.value) return
+  deleting.value = true
   try {
     await deleteTask(t.id)
+    pendingDelete.value = null
     emit('refresh')
   } catch (e) {
     emit('error', e.message)
+  } finally {
+    deleting.value = false
   }
 }
 </script>
@@ -411,6 +443,23 @@ async function onDelete(t) {
   border-color: #ffd9c2;
   color: var(--danger);
   background: var(--danger-soft);
+}
+
+.act--danger-solid {
+  border-color: #f3b3a3;
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.act--danger-solid:hover {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+
+.act:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .empty {

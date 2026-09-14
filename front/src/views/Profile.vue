@@ -1,11 +1,19 @@
 <template>
   <div class="profile-page">
+    <!-- 场景背景：与主页/添加页同款（实景照片 + 提亮蒙层 + Ken Burns） -->
+    <div class="scene" aria-hidden="true">
+      <img class="scene__img" :src="sceneImg" alt="" />
+      <span class="scene__scrim"></span>
+    </div>
+
     <header class="topbar">
       <div class="topbar__left">
         <button class="back-btn" @click="goBack">← 返回任务列表</button>
         <div class="brand">
-          <span class="brand__dot">见</span>
-          <span>个人中心</span>
+          <span class="brand__dot" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </span>
+          <span>自律计划任务平台</span>
         </div>
       </div>
     </header>
@@ -94,6 +102,9 @@ const store = useUserStore()
 const user = ref(store.user)
 const tasks = ref([])
 const loadError = ref('')
+
+// 个人中心场景背景：明亮书桌俯拍实景
+const sceneImg = 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=1920&q=80&auto=format&fit=crop'
 
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六']
 
@@ -201,11 +212,40 @@ onMounted(() => {
     var(--canvas);
 }
 
+/* ---------- 场景背景 ---------- */
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: linear-gradient(150deg, #eef1f4 0%, #dde3ea 55%, #c7d0da 100%);
+}
+
+.scene__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  animation: kenburns 26s ease-in-out infinite alternate;
+}
+
+/* 轻微提亮蒙层，保证纸面内容可读 */
+.scene__scrim {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(90% 80% at 50% 40%, rgba(250, 251, 252, 0.5) 0%, rgba(70, 80, 95, 0.3) 100%);
+}
+
+@keyframes kenburns {
+  from { transform: scale(1.04); }
+  to { transform: scale(1.12) translate3d(-1.5%, -1.5%, 0); }
+}
+
 /* ---------- 顶栏 ---------- */
 .topbar {
   height: 62px;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
   display: flex;
   align-items: center;
@@ -238,8 +278,6 @@ onMounted(() => {
   color: #fff;
   display: grid;
   place-items: center;
-  font-size: 13px;
-  font-weight: 700;
 }
 
 .back-btn {
@@ -261,6 +299,8 @@ onMounted(() => {
 
 /* ---------- 布局 ---------- */
 .container {
+  position: relative;
+  z-index: 1;
   max-width: 720px;
   margin: 0 auto;
   padding: clamp(24px, 4vw, 44px) clamp(16px, 4vw, 24px) 72px;
