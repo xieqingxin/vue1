@@ -1,5 +1,11 @@
 <template>
-  <div class="detail-page">
+  <div class="detail-page" :class="'page--' + taskType">
+    <!-- 场景背景：按任务类型配图（与添加页同一风格） -->
+    <div class="scene" aria-hidden="true">
+      <img class="scene__img" :src="sceneImg" alt="" />
+      <span class="scene__scrim"></span>
+    </div>
+
     <header class="topbar">
       <div class="topbar__left">
         <button class="back-btn" @click="goBack">← 返回任务列表</button>
@@ -141,8 +147,18 @@ const TASK_TYPES = {
   other: { label: '其他', icon: '📌' }
 }
 
+// 各类型场景背景：与添加页保持一致
+const SCENE_IMGS = {
+  exercise: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1920&q=80&auto=format&fit=crop', // 健身房
+  work: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=80&auto=format&fit=crop', // 现代办公室
+  study: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=1920&q=80&auto=format&fit=crop', // 图书馆书架
+  life: 'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=1920&q=80&auto=format&fit=crop', // 明亮厨房
+  other: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1920&q=80&auto=format&fit=crop' // 安静会议室
+}
+
 const taskType = computed(() => (task.value && task.value.type) || 'other')
 const typeMeta = computed(() => TASK_TYPES[taskType.value] || TASK_TYPES.other)
+const sceneImg = computed(() => SCENE_IMGS[taskType.value] || SCENE_IMGS.other)
 
 const statusKey = computed(() => {
   if (!task.value) return 'doing'
@@ -278,11 +294,43 @@ onUnmounted(() => {
 .detail-page {
   min-height: 100vh;
   min-height: 100svh;
-  background:
-    radial-gradient(720px 320px at 85% -10%, rgba(22, 160, 133, 0.1), transparent 65%),
-    radial-gradient(560px 280px at -5% 0%, rgba(125, 211, 252, 0.14), transparent 60%),
-    var(--canvas);
+  background: var(--canvas);
 }
+
+/* ---------- 场景背景（按任务类型配色，与添加页同一风格） ---------- */
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: var(--scene-bg);
+}
+
+.scene__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  animation: kenburns 26s ease-in-out infinite alternate;
+}
+
+/* 提亮蒙层，保证纸面内容可读 */
+.scene__scrim {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(90% 80% at 50% 40%, var(--scrim-a) 0%, var(--scrim-b) 100%);
+}
+
+@keyframes kenburns {
+  from { transform: scale(1.04); }
+  to { transform: scale(1.12) translate3d(-1.5%, -1.5%, 0); }
+}
+
+.page--exercise { --scene-bg: linear-gradient(150deg, #fdeadd 0%, #f8d6bd 55%, #f0bd97 100%); --scrim-a: rgba(255, 248, 242, 0.4); --scrim-b: rgba(140, 80, 40, 0.28); }
+.page--work { --scene-bg: linear-gradient(150deg, #e8eef7 0%, #d5e0ef 55%, #c0cfe4 100%); --scrim-a: rgba(248, 251, 255, 0.42); --scrim-b: rgba(58, 82, 120, 0.3); }
+.page--study { --scene-bg: linear-gradient(150deg, #f3e7c9 0%, #e8d5a8 55%, #d9c08a 100%); --scrim-a: rgba(255, 251, 240, 0.38); --scrim-b: rgba(120, 96, 56, 0.28); }
+.page--life { --scene-bg: linear-gradient(150deg, #e6f4ef 0%, #cfe9e0 55%, #b5dccf 100%); --scrim-a: rgba(246, 253, 250, 0.42); --scrim-b: rgba(40, 90, 80, 0.28); }
+.page--other { --scene-bg: linear-gradient(150deg, #eef1f4 0%, #dde3ea 55%, #c7d0da 100%); --scrim-a: rgba(250, 251, 252, 0.42); --scrim-b: rgba(70, 80, 95, 0.28); }
 
 /* ---------- 顶栏 ---------- */
 .topbar {
@@ -345,6 +393,8 @@ onUnmounted(() => {
 
 /* ---------- 布局 ---------- */
 .container {
+  position: relative;
+  z-index: 1;
   max-width: 720px;
   margin: 0 auto;
   padding: clamp(24px, 4vw, 44px) clamp(16px, 4vw, 24px) 72px;

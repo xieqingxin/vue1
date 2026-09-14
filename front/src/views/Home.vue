@@ -1,5 +1,11 @@
 <template>
   <div class="home">
+    <!-- 场景背景：与添加页同款（实景照片 + 提亮蒙层 + Ken Burns） -->
+    <div class="scene" aria-hidden="true">
+      <img class="scene__img" :src="sceneImg" alt="" />
+      <span class="scene__scrim"></span>
+    </div>
+
     <header class="topbar">
       <div class="brand">
         <span class="brand__dot">见</span>
@@ -22,14 +28,14 @@
         <p>在这里创建任务、跟踪进度，每个任务都像一个订单。</p>
       </div>
 
-      <!-- 任务类型入口：点击标签进入对应的添加页面 -->
+      <!-- 任务类型入口：点击标签进入对应的添加页面（便利贴样式） -->
       <div class="type-entries">
         <button
           v-for="(tp, i) in taskTypes"
           :key="tp.value"
           class="entry"
-          :class="['entry--' + tp.value, { 'entry--paper': tp.value === 'study' }]"
-          :style="{ '--rot': i % 2 === 0 ? '-1.2deg' : '1deg' }"
+          :class="'entry--' + tp.value"
+          :style="{ '--rot': i % 2 === 0 ? '-1.6deg' : '1.4deg' }"
           @click="router.push(`/add/${tp.value}`)"
         >
           <span class="entry__icon">{{ tp.icon }}</span>
@@ -38,8 +44,8 @@
         </button>
       </div>
 
-      <!-- 任务列表 -->
-      <section class="task-section task-section--merged">
+      <!-- 任务列表：便利贴墙（样式见 src/styles/note-wall.css） -->
+      <section class="task-section">
         <div class="task-section__head">
           <h2 class="section-title">全部任务</h2>
           <div class="filters">
@@ -77,12 +83,14 @@
 
         <div v-if="listError" class="msg error">{{ listError }}</div>
 
-        <TaskList
-          :tasks="visibleTasks"
-          :empty-text="tasks.length ? '该筛选条件下暂无任务' : '暂无任务，点击上方标签添加一个吧。'"
-          @refresh="loadTasks"
-          @error="(m) => (listError = m)"
-        />
+        <div class="note-wall">
+          <TaskList
+            :tasks="visibleTasks"
+            :empty-text="tasks.length ? '该筛选条件下暂无任务' : '暂无任务，点击上方标签添加一个吧。'"
+            @refresh="loadTasks"
+            @error="(m) => (listError = m)"
+          />
+        </div>
       </section>
     </main>
 
@@ -125,6 +133,9 @@ import TaskList from '../components/TaskList.vue'
 
 const router = useRouter()
 const store = useUserStore()
+
+// 主页场景背景：桌面俯拍的实景照片（与添加页同一风格）
+const sceneImg = 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=1920&q=80&auto=format&fit=crop'
 
 const user = ref(store.user)
 const tasks = ref([])
@@ -204,10 +215,36 @@ onMounted(() => {
 .home {
   min-height: 100vh;
   min-height: 100svh;
-  background:
-    radial-gradient(720px 320px at 85% -10%, rgba(22, 160, 133, 0.1), transparent 65%),
-    radial-gradient(560px 280px at -5% 0%, rgba(125, 211, 252, 0.14), transparent 60%),
-    var(--canvas);
+  background: var(--canvas);
+}
+
+/* ---------- 场景背景 ---------- */
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: linear-gradient(150deg, #eef1f4 0%, #dde3ea 55%, #c7d0da 100%);
+}
+
+.scene__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  animation: kenburns 26s ease-in-out infinite alternate;
+}
+
+/* 轻微提亮蒙层，保证纸面内容可读 */
+.scene__scrim {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(90% 80% at 50% 40%, rgba(250, 251, 252, 0.5) 0%, rgba(70, 80, 95, 0.3) 100%);
+}
+
+@keyframes kenburns {
+  from { transform: scale(1.04); }
+  to { transform: scale(1.12) translate3d(-1.5%, -1.5%, 0); }
 }
 
 /* ---------- 顶栏 ---------- */
@@ -295,6 +332,8 @@ onMounted(() => {
 
 /* ---------- 布局 ---------- */
 .container {
+  position: relative;
+  z-index: 1;
   max-width: 860px;
   margin: 0 auto;
   padding: clamp(24px, 4vw, 44px) clamp(16px, 4vw, 24px) 64px;
@@ -332,7 +371,7 @@ onMounted(() => {
   padding: clamp(18px, 2.6vw, 26px);
 }
 
-/* ---------- 类型入口按钮（贴纸风格） ---------- */
+/* ---------- 类型入口按钮（便利贴风格，颜色与任务列表便签一致） ---------- */
 .type-entries {
   display: flex;
   flex-wrap: wrap;
@@ -348,8 +387,8 @@ onMounted(() => {
   align-items: center;
   gap: 4px;
   width: 108px;
-  padding: 16px 10px 13px;
-  border-radius: 16px;
+  padding: 20px 10px 14px;
+  border-radius: 2px 2px 2px 12px;
   cursor: pointer;
   font-family: inherit;
   transform: rotate(var(--rot, 0deg));
@@ -381,107 +420,61 @@ onMounted(() => {
   letter-spacing: 0.05em;
 }
 
-/* 普通贴纸：白底 + 彩色描边和硬阴影 */
+/* 入口便利贴：类型主题浅色纸面 + 纹理 + 深色墨水字 */
+.entry--exercise { background: var(--grain), linear-gradient(160deg, #ffe9db 0%, #ffdbc6 70%, #fbcfad 100%); color: #c2551d; }
+.entry--work { background: var(--grain), linear-gradient(160deg, #e0ebff 0%, #d2e2fd 70%, #c2d7f9 100%); color: #1d4ed8; }
+.entry--study { background: var(--grain), linear-gradient(160deg, #ece2ff 0%, #e0d2fd 70%, #d3c1f7 100%); color: #6d28d9; }
+.entry--life { background: var(--grain), linear-gradient(160deg, #d7f2ea 0%, #c7ebe0 70%, #b6e1d3 100%); color: #0f766e; }
+.entry--other { background: var(--grain), linear-gradient(160deg, #e8edf2 0%, #dde4ec 70%, #d1dae4 100%); color: #475569; }
+
 .entry--exercise,
 .entry--work,
+.entry--study,
 .entry--life,
 .entry--other {
-  background: var(--surface);
-  border: 2px solid var(--ec);
-  color: var(--ec);
-  box-shadow: 3px 4px 0 rgba(23, 50, 44, 0.12), 0 10px 20px -12px rgba(23, 50, 44, 0.3);
+  border: none;
+  box-shadow: 0 7px 12px -8px rgba(76, 58, 20, 0.45), 0 2px 3px rgba(76, 58, 20, 0.14);
 }
-
-.entry--exercise { --ec: #e2703a; }
-.entry--work { --ec: #2563eb; }
-.entry--life { --ec: #0d9488; }
-.entry--other { --ec: #64748b; }
 
 .entry--exercise:hover,
 .entry--work:hover,
+.entry--study:hover,
 .entry--life:hover,
 .entry--other:hover {
-  box-shadow: 3px 5px 0 rgba(23, 50, 44, 0.16), 0 14px 24px -12px rgba(23, 50, 44, 0.35);
+  box-shadow: 0 14px 20px -10px rgba(76, 58, 20, 0.5), 0 4px 8px rgba(76, 58, 20, 0.16);
 }
 
-/* 学习贴纸：纸张背景（横线 + 装订线） */
-.entry--paper {
-  border: 1px solid #e6dfc8;
-  color: #6d28d9;
-  border-radius: 6px;
-  background:
-    linear-gradient(90deg, transparent 0 12px, rgba(224, 138, 138, 0.5) 12px 13px, transparent 13px),
-    repeating-linear-gradient(transparent 0 15px, rgba(124, 58, 237, 0.14) 15px 16px),
-    #fffdf5;
-  box-shadow: 3px 4px 0 rgba(23, 50, 44, 0.12), 0 10px 20px -12px rgba(23, 50, 44, 0.3);
-}
-
-/* 纸张顶部的胶带 */
-.entry--paper::before {
+/* 顶部居中的透明胶带（与任务便签同款） */
+.entry::before {
   content: '';
   position: absolute;
-  top: -8px;
+  top: -9px;
   left: 50%;
+  width: 56px;
+  height: 20px;
   transform: translateX(-50%) rotate(-3deg);
-  width: 52px;
-  height: 16px;
-  background: rgba(255, 236, 153, 0.75);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  background:
+    linear-gradient(105deg,
+      transparent 0 18%,
+      rgba(255, 255, 255, 0.55) 30%,
+      rgba(255, 255, 255, 0.12) 42%,
+      transparent 55% 68%,
+      rgba(255, 255, 255, 0.4) 78%,
+      transparent 90%),
+    rgba(232, 240, 242, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+  clip-path: polygon(
+    0% 15%, 3% 30%, 0% 45%, 3% 60%, 0% 75%, 2% 100%,
+    98% 100%, 100% 75%, 97% 60%, 100% 45%, 97% 30%, 100% 15%,
+    98% 0%, 2% 0%
+  );
+  filter: drop-shadow(0 2px 3px rgba(76, 58, 20, 0.16));
 }
 
 /* ---------- 任务列表 ---------- */
 .task-section {
   animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both;
-}
-
-/* 全部任务合并为一张纸（与添加任务页同款表现，米色横线纸：红色装订线 + 紫色横线） */
-.task-section--merged {
-  --paper-border: #e6dfc8;
-  --paper-surface:
-    linear-gradient(90deg, transparent 0 26px, rgba(224, 138, 138, 0.5) 26px 27px, transparent 27px),
-    repeating-linear-gradient(transparent 0 27px, rgba(124, 58, 237, 0.1) 27px 28px),
-    #fffdf5;
-  --paper-divider: rgba(124, 58, 237, 0.34);
-  --paper-hover: rgba(124, 58, 237, 0.04);
-  --paper-shadow: 4px 6px 0 rgba(23, 50, 44, 0.14);
-  --paper-radius: 8px;
-}
-
-/* 纸张背景放在整个列表容器上，卡片自身透明 */
-.task-section--merged :deep(.task-list) {
-  border: 1px solid var(--paper-border);
-  border-radius: var(--paper-radius);
-  padding: 10px 14px 10px 10px;
-  gap: 0;
-  background: var(--paper-surface);
-  box-shadow: var(--paper-shadow);
-}
-
-/* 单张卡片不再各自成纸：去边框、去阴影、去倾斜 */
-.task-section--merged :deep(.task-list .task-card),
-.task-section--merged :deep(.task-list .task-card.done),
-.task-section--merged :deep(.task-list .task-card.expired) {
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  transform: none;
-  padding: 18px 8px 18px 24px;
-}
-
-/* 卡片之间用虚线分隔，像纸上的折痕 */
-.task-section--merged :deep(.task-list li:not(:last-child) .task-card) {
-  border-bottom: 1.5px dashed var(--paper-divider);
-}
-
-.task-section--merged :deep(.task-list .task-card::before) {
-  display: none;
-}
-
-.task-section--merged :deep(.task-list .task-card:hover) {
-  transform: none;
-  box-shadow: none;
-  background: var(--paper-hover);
 }
 
 .task-section__head {

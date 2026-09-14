@@ -55,8 +55,8 @@
         </form>
       </section>
 
-      <!-- 对应类型的任务列表 -->
-      <section class="type-tasks type-tasks--merged">
+      <!-- 对应类型的任务列表：便利贴墙（样式见 src/styles/note-wall.css） -->
+      <section class="type-tasks">
         <div class="type-tasks__head">
           <h2 class="section-title">{{ meta.icon }} {{ meta.label }}任务</h2>
           <div class="filters">
@@ -74,12 +74,14 @@
 
         <div v-if="listError" class="msg error">{{ listError }}</div>
 
-        <TaskList
-          :tasks="visibleTasks"
-          :empty-text="`还没有${meta.label}任务，在上方添加一个吧。`"
-          @refresh="loadTasks"
-          @error="(m) => (listError = m)"
-        />
+        <div class="note-wall">
+          <TaskList
+            :tasks="visibleTasks"
+            :empty-text="`还没有${meta.label}任务，在上方添加一个吧。`"
+            @refresh="loadTasks"
+            @error="(m) => (listError = m)"
+          />
+        </div>
       </section>
     </main>
   </div>
@@ -547,45 +549,7 @@ onMounted(loadTasks)
   box-shadow: none;
 }
 
-/* ---------- 全部任务合并为一张纸 ---------- */
-/* 纸张背景放在整个列表容器上，卡片自身透明 */
-.type-tasks--merged :deep(.task-list) {
-  border: 1px solid var(--paper-border);
-  border-radius: var(--paper-radius);
-  padding: 10px 14px 10px 10px;
-  gap: 0;
-  background: var(--paper-surface);
-  box-shadow: var(--paper-shadow);
-}
-
-/* 单张卡片不再各自成纸：去边框、去阴影、去倾斜 */
-.type-tasks--merged :deep(.task-list .task-card),
-.type-tasks--merged :deep(.task-list .task-card.done),
-.type-tasks--merged :deep(.task-list .task-card.expired) {
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  transform: none;
-  padding: 18px 8px 18px 24px;
-}
-
-/* 卡片之间用虚线分隔，像纸上的折痕 */
-.type-tasks--merged :deep(.task-list li:not(:last-child) .task-card) {
-  border-bottom: 1.5px dashed var(--paper-divider);
-}
-
-.type-tasks--merged :deep(.task-list .task-card::before) {
-  display: none;
-}
-
-.type-tasks--merged :deep(.task-list .task-card:hover) {
-  transform: none;
-  box-shadow: none;
-  background: var(--paper-hover);
-}
-
-/* ---------- 对应类型任务列表 ---------- */
+/* ---------- 对应类型任务列表（便利贴墙见 src/styles/note-wall.css） ---------- */
 .type-tasks {
   margin-top: 36px;
   animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both;

@@ -1,0 +1,298 @@
+/* ---------- 共享便利贴墙 ----------
+   用法：<div class="note-wall"><TaskList /></div>
+   任务列表 = 贴在米色横线纸上的便利贴，左右两列各一张。
+   注意：TaskList 中 li 自身就是 .task-card（<li class="task-card">），
+   因此所有卡片规则都写成 li.task-card，不能用后代选择器 li .task-card。
+   选择器均带 .note-wall 前缀且特异性高于组件 scoped 样式，只作用于该容器内部。 */
+
+:root {
+  /* 纸张纹理：SVG feTurbulence 噪点，作为最上层背景叠加 */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)' opacity='0.055'/%3E%3C/svg%3E");
+}
+
+.note-wall {
+  --paper-border: #e6dfc8;
+  --paper-surface:
+    var(--grain),
+    linear-gradient(90deg, transparent 0 26px, rgba(224, 138, 138, 0.5) 26px 27px, transparent 27px),
+    repeating-linear-gradient(transparent 0 27px, rgba(124, 58, 237, 0.1) 27px 28px),
+    #fffdf5;
+  --paper-shadow: 4px 6px 0 rgba(23, 50, 44, 0.14);
+  --note-ink: #43391f;
+  --note-ink-soft: #6b6142;
+  --note-ink-faint: #97895f;
+}
+
+/* 底板：一张大纸 */
+.note-wall ul.task-list {
+  list-style: none;
+  border: 1px solid var(--paper-border);
+  border-radius: 10px;
+  padding: clamp(20px, 3.4vw, 30px) clamp(16px, 3vw, 26px) clamp(24px, 3.6vw, 34px);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(18px, 3vw, 26px);
+  background: var(--paper-surface);
+  box-shadow: var(--paper-shadow);
+}
+
+/* 右列便签错开一点，像随手贴的 */
+.note-wall .task-list li:nth-child(even) {
+  margin-top: 18px;
+}
+
+/* 每张便签：彩色方纸 + 顶部胶带 + 卷角投影。
+   歪斜用独立的 rotate 属性，入场动画用 transform，两者互不覆盖 */
+.note-wall .task-list li.task-card {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 10px;
+  min-height: 190px;
+  padding: 24px 16px 14px;
+  border: none;
+  border-radius: 2px 2px 2px 14px;
+  box-shadow: 0 7px 12px -8px rgba(76, 58, 20, 0.45), 0 2px 3px rgba(76, 58, 20, 0.14);
+  color: var(--note-ink);
+  transform: none;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), rotate 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s, filter 0.2s;
+}
+
+/* 便签颜色跟随任务类型主题色，与入口按钮、AddTask 页统一（最上层叠加纸张纹理） */
+.note-wall .task-list li.task-card.type-exercise {
+  background: var(--grain), linear-gradient(160deg, #ffe9db 0%, #ffdbc6 70%, #fbcfad 100%);
+}
+
+.note-wall .task-list li.task-card.type-work {
+  background: var(--grain), linear-gradient(160deg, #e0ebff 0%, #d2e2fd 70%, #c2d7f9 100%);
+}
+
+.note-wall .task-list li.task-card.type-study {
+  background: var(--grain), linear-gradient(160deg, #ece2ff 0%, #e0d2fd 70%, #d3c1f7 100%);
+}
+
+.note-wall .task-list li.task-card.type-life {
+  background: var(--grain), linear-gradient(160deg, #d7f2ea 0%, #c7ebe0 70%, #b6e1d3 100%);
+}
+
+.note-wall .task-list li.task-card.type-other {
+  background: var(--grain), linear-gradient(160deg, #e8edf2 0%, #dde4ec 70%, #d1dae4 100%);
+}
+
+/* 左右错落的歪斜角度（奇偶交替，像随手贴的） */
+.note-wall .task-list li:nth-child(odd) {
+  rotate: -1.4deg;
+}
+
+.note-wall .task-list li:nth-child(even) {
+  rotate: 1.2deg;
+}
+
+/* 顶部居中的透明胶带：无色半透 + 斜向高光 + 两端锯齿撕口 */
+.note-wall .task-list li.task-card::before {
+  content: '';
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  right: auto;
+  width: 76px;
+  height: 24px;
+  transform: translateX(-50%) rotate(-2.5deg);
+  background:
+    linear-gradient(105deg,
+      transparent 0 18%,
+      rgba(255, 255, 255, 0.55) 30%,
+      rgba(255, 255, 255, 0.12) 42%,
+      transparent 55% 68%,
+      rgba(255, 255, 255, 0.4) 78%,
+      transparent 90%),
+    rgba(232, 240, 242, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+  /* 左右两端的锯齿撕口 */
+  clip-path: polygon(
+    0% 15%, 3% 30%, 0% 45%, 3% 60%, 0% 75%, 2% 100%,
+    98% 100%, 100% 75%, 97% 60%, 100% 45%, 97% 30%, 100% 15%,
+    98% 0%, 2% 0%
+  );
+  /* clip-path 会裁掉 box-shadow，用 drop-shadow 让投影跟随锯齿轮廓 */
+  filter: drop-shadow(0 2px 3px rgba(76, 58, 20, 0.16));
+}
+
+/* 卷起的右下角：一片模糊投影藏在便签底下 */
+.note-wall .task-list li::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  right: 6px;
+  bottom: -5px;
+  width: 44px;
+  height: 16px;
+  background: rgba(76, 58, 20, 0.32);
+  filter: blur(6px);
+  transform: rotate(5deg);
+}
+
+/* 悬停：扶正、抬起 */
+.note-wall .task-list li.task-card:hover {
+  rotate: 0deg;
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 16px 24px -12px rgba(76, 58, 20, 0.5), 0 4px 8px rgba(76, 58, 20, 0.16);
+}
+
+/* 已完成：褪色；已过期：压暗一点 */
+.note-wall .task-list li.task-card.done {
+  filter: saturate(0.45);
+  opacity: 0.85;
+}
+
+.note-wall .task-list li.task-card.done .task-card__name {
+  color: var(--note-ink-faint);
+}
+
+.note-wall .task-list li.task-card.expired {
+  opacity: 0.92;
+}
+
+.note-wall .task-list li.task-card.expired .task-card__name {
+  color: var(--note-ink-faint);
+}
+
+/* 便签上的墨水色 */
+.note-wall .task-list li.task-card .task-card__name {
+  color: var(--note-ink);
+}
+
+.note-wall .task-list li.task-card .task-card__content {
+  color: var(--note-ink-soft);
+}
+
+.note-wall .task-list li.task-card .task-card__meta {
+  color: var(--note-ink-faint);
+  flex-wrap: wrap;
+  row-gap: 2px;
+  font-size: 12px;
+}
+
+.note-wall .task-list li.task-card .task-card__meta .dot {
+  color: rgba(151, 137, 95, 0.6);
+}
+
+.note-wall .task-list li.task-card .task-card__meta .meta-done {
+  color: #0f766e;
+}
+
+/* 小标签统一成半透明白底，像写在便签上的贴纸 */
+.note-wall .task-list li.task-card .task-status {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.note-wall .task-list li.task-card .task-status.is-doing {
+  color: #0f766e;
+}
+
+.note-wall .task-list li.task-card .task-status.is-done {
+  color: #6b7280;
+}
+
+.note-wall .task-list li.task-card .task-status.is-expired {
+  color: #dc2626;
+}
+
+.note-wall .task-list li.task-card .task-type-tag {
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--note-ink-soft);
+}
+
+.note-wall .task-list li.task-card .task-card__reward {
+  margin-left: 0;
+  background: rgba(255, 255, 255, 0.6);
+  color: #8a5a00;
+}
+
+/* 操作按钮横排贴在便签底部 */
+.note-wall .task-list li.task-card .task-card__actions {
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-top: auto;
+}
+
+.note-wall .task-list li.task-card .act {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(67, 57, 31, 0.2);
+  color: var(--note-ink-soft);
+}
+
+.note-wall .task-list li.task-card .act:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--note-ink);
+  color: var(--note-ink);
+}
+
+.note-wall .task-list li.task-card .act--done {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(15, 118, 110, 0.35);
+  color: #0f766e;
+}
+
+.note-wall .task-list li.task-card .act--done:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.note-wall .task-list li.task-card .act--danger:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(220, 38, 38, 0.45);
+  color: #dc2626;
+}
+
+/* 空列表：纸面仍在，便签还没贴上去 */
+.note-wall p.empty {
+  border: 1px solid var(--paper-border);
+  border-radius: 10px;
+  background: var(--paper-surface);
+  box-shadow: var(--paper-shadow);
+  color: var(--note-ink-faint);
+}
+
+/* 便签逐个"贴上"的入场动画。
+   fill-mode 用 backwards 而非 both：动画结束后 transform 交还给元素本身，
+   不会永久覆盖悬停位移；倾斜角走独立的 rotate 属性，与动画互不冲突 */
+.note-wall .task-list li {
+  animation: note-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.note-wall .task-list li:nth-child(2) { animation-delay: 0.05s; }
+.note-wall .task-list li:nth-child(3) { animation-delay: 0.1s; }
+.note-wall .task-list li:nth-child(4) { animation-delay: 0.15s; }
+.note-wall .task-list li:nth-child(5) { animation-delay: 0.2s; }
+.note-wall .task-list li:nth-child(6) { animation-delay: 0.25s; }
+.note-wall .task-list li:nth-child(7) { animation-delay: 0.3s; }
+.note-wall .task-list li:nth-child(n + 8) { animation-delay: 0.35s; }
+
+@keyframes note-in {
+  from {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  /* 窄屏便利贴改单列 */
+  .note-wall ul.task-list {
+    grid-template-columns: 1fr;
+  }
+
+  .note-wall .task-list li:nth-child(even) {
+    margin-top: 0;
+  }
+}
