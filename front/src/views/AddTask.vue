@@ -1,9 +1,9 @@
 <template>
   <div class="add-page" :class="'page--' + type">
-    <!-- 学习类型：教室背景 -->
-    <div v-if="type === 'study'" class="classroom" aria-hidden="true">
-      <img class="classroom__img" :src="classroomImg" alt="" />
-      <span class="classroom__scrim"></span>
+    <!-- 场景背景 -->
+    <div class="scene" aria-hidden="true">
+      <img class="scene__img" :src="sceneImg" alt="" />
+      <span class="scene__scrim"></span>
     </div>
 
     <header class="topbar">
@@ -19,7 +19,7 @@
       <section class="sheet">
         <div v-if="error" class="msg error">{{ error }}</div>
 
-        <form class="sticker-form" :class="{ 'form--paper': type === 'study' }" @submit.prevent="onCreate">
+        <form class="sticker-form form--paper" @submit.prevent="onCreate">
           <div class="sticker-field" style="--rot: -0.5deg">
             <label for="t-name">任务名</label>
             <input id="t-name" v-model.trim="form.name" type="text" placeholder="例如：整理季度报表" maxlength="100" />
@@ -56,7 +56,7 @@
       </section>
 
       <!-- 对应类型的任务列表 -->
-      <section class="type-tasks">
+      <section class="type-tasks type-tasks--merged">
         <div class="type-tasks__head">
           <h2 class="section-title">{{ meta.icon }} {{ meta.label }}任务</h2>
           <div class="filters">
@@ -94,9 +94,14 @@ import TaskList from '../components/TaskList.vue'
 const route = useRoute()
 const router = useRouter()
 
-// 学习类型背景：明亮的图书馆书架实景照片
-const classroomImg =
-  'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=1920&q=80&auto=format&fit=crop'
+// 各类型场景背景：明亮的实景照片
+const SCENE_IMGS = {
+  exercise: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1920&q=80&auto=format&fit=crop', // 健身房
+  work: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=80&auto=format&fit=crop', // 现代办公室
+  study: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=1920&q=80&auto=format&fit=crop', // 图书馆书架
+  life: 'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=1920&q=80&auto=format&fit=crop', // 明亮厨房
+  other: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1920&q=80&auto=format&fit=crop' // 安静会议室
+}
 
 // 任务类型定义（与首页保持一致）
 const TASK_TYPES = [
@@ -113,6 +118,9 @@ const type = computed(() => {
 })
 
 const meta = computed(() => TASK_TYPES.find((t) => t.value === type.value))
+
+// 当前类型的场景背景图
+const sceneImg = computed(() => SCENE_IMGS[type.value])
 
 const form = ref({ name: '', content: '', startTime: '', endTime: '', reward: '' })
 const creating = ref(false)
@@ -210,16 +218,101 @@ onMounted(loadTasks)
 .page--life { --tc: #0d9488; }
 .page--other { --tc: #64748b; }
 
-/* ---------- 教室背景（学习） ---------- */
-.classroom {
+/* 学习：米色横线纸（红色装订线 + 紫色横线） */
+.page--study {
+  --paper-border: #e6dfc8;
+  --paper-surface:
+    linear-gradient(90deg, transparent 0 26px, rgba(224, 138, 138, 0.5) 26px 27px, transparent 27px),
+    repeating-linear-gradient(transparent 0 27px, rgba(124, 58, 237, 0.1) 27px 28px),
+    #fffdf5;
+  --paper-divider: rgba(124, 58, 237, 0.34);
+  --paper-hover: rgba(124, 58, 237, 0.04);
+  --paper-ink: #6d28d9;
+  --paper-shadow: 4px 6px 0 rgba(23, 50, 44, 0.14);
+  --paper-radius: 8px;
+  --scene-bg: linear-gradient(150deg, #f3e7c9 0%, #e8d5a8 55%, #d9c08a 100%);
+  --scrim-a: rgba(255, 251, 240, 0.32);
+  --scrim-b: rgba(120, 96, 56, 0.22);
+}
+
+/* 工作：横线笔记本（白色纸面 + 蓝色横线 + 红色装订边线） */
+.page--work {
+  --paper-border: #d9e1ec;
+  --paper-surface:
+    linear-gradient(90deg, transparent 0 24px, rgba(220, 38, 38, 0.4) 24px 25px, transparent 25px 27px, rgba(220, 38, 38, 0.4) 27px 28px, transparent 28px),
+    repeating-linear-gradient(transparent 0 27px, rgba(37, 99, 235, 0.14) 27px 28px),
+    #fcfdff;
+  --paper-divider: rgba(37, 99, 235, 0.32);
+  --paper-hover: rgba(37, 99, 235, 0.04);
+  --paper-ink: #1d4ed8;
+  --paper-shadow: 0 10px 24px rgba(30, 58, 110, 0.12), 0 2px 6px rgba(30, 58, 110, 0.08);
+  --paper-radius: 10px;
+  --scene-bg: linear-gradient(150deg, #e8eef7 0%, #d5e0ef 55%, #c0cfe4 100%);
+  --scrim-a: rgba(248, 251, 255, 0.36);
+  --scrim-b: rgba(58, 82, 120, 0.24);
+}
+
+/* 锻炼：暖橙横线本 */
+.page--exercise {
+  --paper-border: #f0dcc9;
+  --paper-surface:
+    linear-gradient(90deg, transparent 0 24px, rgba(226, 112, 58, 0.45) 24px 25px, transparent 25px),
+    repeating-linear-gradient(transparent 0 27px, rgba(226, 112, 58, 0.12) 27px 28px),
+    #fffaf5;
+  --paper-divider: rgba(226, 112, 58, 0.34);
+  --paper-hover: rgba(226, 112, 58, 0.05);
+  --paper-ink: #c2551d;
+  --paper-shadow: 0 10px 24px rgba(120, 60, 20, 0.12), 0 2px 6px rgba(120, 60, 20, 0.08);
+  --paper-radius: 10px;
+  --scene-bg: linear-gradient(150deg, #fdeadd 0%, #f8d6bd 55%, #f0bd97 100%);
+  --scrim-a: rgba(255, 248, 242, 0.34);
+  --scrim-b: rgba(140, 80, 40, 0.22);
+}
+
+/* 生活：薄荷绿横线本 */
+.page--life {
+  --paper-border: #cfe5dd;
+  --paper-surface:
+    linear-gradient(90deg, transparent 0 24px, rgba(13, 148, 136, 0.4) 24px 25px, transparent 25px),
+    repeating-linear-gradient(transparent 0 27px, rgba(13, 148, 136, 0.12) 27px 28px),
+    #f7fdfb;
+  --paper-divider: rgba(13, 148, 136, 0.32);
+  --paper-hover: rgba(13, 148, 136, 0.05);
+  --paper-ink: #0f766e;
+  --paper-shadow: 0 10px 24px rgba(20, 80, 70, 0.12), 0 2px 6px rgba(20, 80, 70, 0.08);
+  --paper-radius: 10px;
+  --scene-bg: linear-gradient(150deg, #e6f4ef 0%, #cfe9e0 55%, #b5dccf 100%);
+  --scrim-a: rgba(246, 253, 250, 0.36);
+  --scrim-b: rgba(40, 90, 80, 0.22);
+}
+
+/* 其他：中性灰蓝横线本 */
+.page--other {
+  --paper-border: #dfe4ea;
+  --paper-surface:
+    linear-gradient(90deg, transparent 0 24px, rgba(100, 116, 139, 0.4) 24px 25px, transparent 25px),
+    repeating-linear-gradient(transparent 0 27px, rgba(100, 116, 139, 0.12) 27px 28px),
+    #fbfcfd;
+  --paper-divider: rgba(100, 116, 139, 0.34);
+  --paper-hover: rgba(100, 116, 139, 0.05);
+  --paper-ink: #475569;
+  --paper-shadow: 0 10px 24px rgba(50, 60, 75, 0.12), 0 2px 6px rgba(50, 60, 75, 0.08);
+  --paper-radius: 10px;
+  --scene-bg: linear-gradient(150deg, #eef1f4 0%, #dde3ea 55%, #c7d0da 100%);
+  --scrim-a: rgba(250, 251, 252, 0.36);
+  --scrim-b: rgba(70, 80, 95, 0.22);
+}
+
+/* ---------- 场景背景 ---------- */
+.scene {
   position: fixed;
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  background: linear-gradient(150deg, #f3e7c9 0%, #e8d5a8 55%, #d9c08a 100%);
+  background: var(--scene-bg);
 }
 
-.classroom__img {
+.scene__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -228,11 +321,10 @@ onMounted(loadTasks)
 }
 
 /* 轻微提亮蒙层，保证纸张表单可读 */
-.classroom__scrim {
+.scene__scrim {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(90% 80% at 50% 40%, rgba(255, 251, 240, 0.32) 0%, rgba(120, 96, 56, 0.22) 100%);
+  background: radial-gradient(90% 80% at 50% 40%, var(--scrim-a) 0%, var(--scrim-b) 100%);
 }
 
 @keyframes kenburns {
@@ -342,16 +434,13 @@ onMounted(loadTasks)
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
-/* 学习类型：整个表单 = 一张纸（米色纸面 + 紫色横线 + 红色装订线） */
+/* 整个表单 = 一张纸（纸面样式由 --paper-surface 定义） */
 .form--paper {
-  border: 1px solid #e6dfc8;
-  border-radius: 8px;
+  border: 1px solid var(--paper-border);
+  border-radius: var(--paper-radius);
   padding: 24px 22px 6px;
-  background:
-    linear-gradient(90deg, transparent 0 26px, rgba(224, 138, 138, 0.5) 26px 27px, transparent 27px),
-    repeating-linear-gradient(transparent 0 27px, rgba(124, 58, 237, 0.1) 27px 28px),
-    #fffdf5;
-  box-shadow: 4px 6px 0 rgba(23, 50, 44, 0.14);
+  background: var(--paper-surface);
+  box-shadow: var(--paper-shadow);
 }
 
 /* 纸上的字段不再各自成卡片，只保留标签和输入 */
@@ -380,12 +469,12 @@ onMounted(loadTasks)
 }
 
 .form--paper .sticker-field label {
-  color: #6d28d9;
+  color: var(--paper-ink);
 }
 
 .form--paper .btn-create {
-  border-color: #7c3aed;
-  background: #7c3aed;
+  border-color: var(--tc);
+  background: var(--tc);
 }
 
 .sticker-field label {
@@ -456,6 +545,44 @@ onMounted(loadTasks)
   opacity: 0.55;
   cursor: not-allowed;
   box-shadow: none;
+}
+
+/* ---------- 全部任务合并为一张纸 ---------- */
+/* 纸张背景放在整个列表容器上，卡片自身透明 */
+.type-tasks--merged :deep(.task-list) {
+  border: 1px solid var(--paper-border);
+  border-radius: var(--paper-radius);
+  padding: 10px 14px 10px 10px;
+  gap: 0;
+  background: var(--paper-surface);
+  box-shadow: var(--paper-shadow);
+}
+
+/* 单张卡片不再各自成纸：去边框、去阴影、去倾斜 */
+.type-tasks--merged :deep(.task-list .task-card),
+.type-tasks--merged :deep(.task-list .task-card.done),
+.type-tasks--merged :deep(.task-list .task-card.expired) {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  transform: none;
+  padding: 18px 8px 18px 24px;
+}
+
+/* 卡片之间用虚线分隔，像纸上的折痕 */
+.type-tasks--merged :deep(.task-list li:not(:last-child) .task-card) {
+  border-bottom: 1.5px dashed var(--paper-divider);
+}
+
+.type-tasks--merged :deep(.task-list .task-card::before) {
+  display: none;
+}
+
+.type-tasks--merged :deep(.task-list .task-card:hover) {
+  transform: none;
+  box-shadow: none;
+  background: var(--paper-hover);
 }
 
 /* ---------- 对应类型任务列表 ---------- */
