@@ -2,7 +2,7 @@
   <div class="auth-page">
     <img
       class="auth-bg"
-      src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=serene%20fresh%20morning%20forest%20with%20soft%20sunlight%20rays%20through%20green%20leaves%20and%20dew%2C%20calm%20minimal%20nature%20photography%2C%20airy%20pastel%20mint%20tones&image_size=landscape_16_9"
+      :src="bgImg"
       alt=""
     />
     <div class="auth-brand">
@@ -44,6 +44,7 @@ import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { login } from '../api/user'
 import { useUserStore } from '../store/user'
+import bgImg from '../assets/bg/login.jpg' // 登录页背景：晨雾森林实景（本地资源）
 
 const router = useRouter()
 const store = useUserStore()
