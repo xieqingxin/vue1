@@ -6,6 +6,7 @@
         :key="t.id"
         class="task-card"
         :class="['type-' + (t.type || 'other'), { done: t.status === 1, expired: t.status === 2 }]"
+        @click="router.push(`/task/${t.id}`)"
       >
         <div class="task-card__main">
           <div class="task-card__head">
@@ -13,9 +14,7 @@
             <span class="task-type-tag" :class="'tag-' + (t.type || 'other')">
               {{ typeLabel(t.type) }}
             </span>
-            <h3 class="task-card__name">
-              <router-link :to="`/task/${t.id}`" class="task-card__link">{{ t.name }}</router-link>
-            </h3>
+            <h3 class="task-card__name">{{ t.name }}</h3>
             <span class="task-card__reward">奖励 {{ t.reward }}</span>
           </div>
           <p v-if="t.content" class="task-card__content">{{ t.content }}</p>
@@ -29,8 +28,8 @@
             </template>
           </div>
         </div>
-        <div class="task-card__actions">
-          <button class="act" @click="router.push(`/task/${t.id}`)">详情</button>
+        <!-- 操作区阻止冒泡，避免触发整卡跳转 -->
+        <div class="task-card__actions" @click.stop>
           <button v-if="t.status === 0" class="act act--done" @click="askComplete(t)">标记完成</button>
           <button class="act act--danger" @click="onDelete(t)">删除</button>
         </div>
@@ -186,6 +185,7 @@ async function onDelete(t) {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  cursor: pointer;
   background: var(--surface);
   border: 2px solid var(--tc, var(--accent));
   border-radius: 16px;
@@ -329,17 +329,6 @@ async function onDelete(t) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.task-card__link {
-  color: inherit;
-  text-decoration: none;
-  transition: color 0.18s;
-}
-
-.task-card__link:hover {
-  color: var(--accent-deep);
-  text-decoration: underline;
 }
 
 .task-card__reward {
