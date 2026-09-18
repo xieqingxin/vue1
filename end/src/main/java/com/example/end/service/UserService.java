@@ -1,9 +1,10 @@
 package com.example.end.service;
 
-import com.example.end.dao.UserDao;
 import com.example.end.dto.UserDTO;
 import com.example.end.entity.User;
+import com.example.end.mapper.UserMapper;
 import com.example.end.util.JwtUtil;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +15,11 @@ import java.util.Map;
 @Service
 public class UserService {
 
-    private final UserDao userDao;
+    private final UserMapper userMapper;
     private final JwtUtil jwtUtil;
 
-    public UserService(UserDao userDao, JwtUtil jwtUtil) {
-        this.userDao = userDao;
+    public UserService(UserMapper userMapper, JwtUtil jwtUtil) {
+        this.userMapper = userMapper;
         this.jwtUtil = jwtUtil;
     }
 
@@ -30,16 +31,17 @@ public class UserService {
         user.setNickname(dto.getNickname() == null || dto.getNickname().isEmpty()
                 ? dto.getUsername() : dto.getNickname());
         user.setEmail(dto.getEmail());
-        Long id = userDao.insert(user);
-        if (id == null) {
+        try {
+            userMapper.insert(user);
+        } catch (DuplicateKeyException e) {
             throw new IllegalArgumentException("用户名已存在");
         }
-        return id;
+        return user.getId();
     }
 
     /** 登录成功返回 token + 用户信息，失败抛出异常 */
     public Map<String, Object> login(UserDTO dto) {
-        User user = userDao.findByUsername(dto.getUsername());
+        User user = userMapper.findByUsername(dto.getUsername());
         if (user == null || !BCrypt.checkpw(dto.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("用户名或密码错误");
         }
@@ -50,7 +52,7 @@ public class UserService {
     }
 
     public Map<String, Object> profile(Long userId) {
-        User user = userDao.findById(userId);
+        User user = userMapper.findById(userId);
         if (user == null) {
             throw new IllegalArgumentException("用户不存在");
         }
