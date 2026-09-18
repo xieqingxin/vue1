@@ -27,17 +27,37 @@
 
           <div class="sticker-field" style="--rot: 0.4deg">
             <label for="t-content">任务内容</label>
-            <input id="t-content" v-model.trim="form.content" type="text" placeholder="简要描述要做的事（选填）" maxlength="1000" />
+            <textarea id="t-content" v-model.trim="form.content" rows="3" maxlength="1000" placeholder="简要描述要做的事（选填）"></textarea>
           </div>
 
           <div class="field-grid">
             <div class="sticker-field" style="--rot: 0.5deg">
               <label for="t-start">开始时间</label>
-              <input id="t-start" v-model="form.startTime" type="datetime-local" />
+              <el-date-picker
+                id="t-start"
+                v-model="form.startTime"
+                type="datetime"
+                placeholder="选择开始时间"
+                format="YYYY-MM-DD HH:mm"
+                value-format="YYYY-MM-DDTHH:mm:ss"
+                placement="bottom-start"
+                :fallback-placements="['bottom-start', 'bottom']"
+                :clearable="true"
+              />
             </div>
             <div class="sticker-field" style="--rot: -0.4deg">
               <label for="t-end">结束时间</label>
-              <input id="t-end" v-model="form.endTime" type="datetime-local" />
+              <el-date-picker
+                id="t-end"
+                v-model="form.endTime"
+                type="datetime"
+                placeholder="选择结束时间"
+                format="YYYY-MM-DD HH:mm"
+                value-format="YYYY-MM-DDTHH:mm:ss"
+                placement="bottom-start"
+                :fallback-placements="['bottom-start', 'bottom']"
+                :clearable="true"
+              />
             </div>
           </div>
 
@@ -117,7 +137,7 @@ const meta = computed(() => TASK_TYPES.find((t) => t.value === type.value))
 // 当前类型的场景背景图
 const sceneImg = computed(() => SCENE_IMGS[type.value])
 
-const form = ref({ name: '', content: '', startTime: '', endTime: '', reward: '' })
+const form = ref({ name: '', content: '', startTime: null, endTime: null, reward: '' })
 const creating = ref(false)
 const error = ref('')
 
@@ -180,11 +200,11 @@ async function onCreate() {
       name: f.name,
       content: f.content,
       type: type.value,
-      startTime: f.startTime.length === 16 ? f.startTime + ':00' : f.startTime,
-      endTime: f.endTime.length === 16 ? f.endTime + ':00' : f.endTime,
+      startTime: f.startTime,
+      endTime: f.endTime,
       reward: f.reward
     })
-    form.value = { name: '', content: '', startTime: '', endTime: '', reward: '' }
+    form.value = { name: '', content: '', startTime: null, endTime: null, reward: '' }
     await loadTasks()
   } catch (e) {
     error.value = e.message
@@ -481,18 +501,57 @@ onMounted(loadTasks)
   margin-bottom: 6px;
 }
 
-.sticker-field input {
+.sticker-field input,
+.sticker-field textarea {
   width: 100%;
   border: none;
   outline: none;
   background: transparent;
   font-size: 14.5px;
   font-family: inherit;
+  line-height: 1.6;
   color: var(--ink);
 }
 
-.sticker-field input::placeholder {
+.sticker-field input::placeholder,
+.sticker-field textarea::placeholder {
   color: #a9bcb6;
+}
+
+/* 任务内容：约 3 行高，内容超长时出现滚动条 */
+.sticker-field textarea {
+  min-height: 76px;
+  resize: none;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.18) transparent;
+}
+
+.sticker-field textarea::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sticker-field textarea::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 999px;
+}
+
+/* Element Plus 日期时间选择器：去掉外框，融入纸面 */
+.form--paper :deep(.el-date-editor) {
+  width: 100%;
+  --el-input-placeholder-color: #a9bcb6;
+}
+
+.form--paper :deep(.el-date-editor .el-input__wrapper) {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.form--paper :deep(.el-date-editor .el-input__inner) {
+  color: var(--ink);
+  font-size: 14.5px;
+  font-family: inherit;
 }
 
 .field-grid {

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D 翻书特效</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #2c3e50;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+
+        /* 书本容器 */
+        .book {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            perspective: 1500px; /* 3D 透视深度 */
+        }
+
+        /* 纸张通用样式 */
+        .paper {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            transform-origin: left center; /* 旋转轴在左侧 */
+            transition: transform 1s cubic-bezier(0.645, 0.045, 0.355, 1); /* 平滑过渡 */
+            transform-style: preserve-3d; /* 保持子元素3D空间 */
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* 纸张的正反面 */
+        .front, .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden; /* 背面不可见 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-color: #fdfbf7; /* 纸张颜色 */
+            border: 1px solid #ddd;
+        }
+
+        .front {
+            z-index: 2;
+            background-image: linear-gradient(to right, #e3e3e3 0%, #fdfbf7 10%); /* 左侧阴影模拟装订 */
+        }
+
+        .back {
+            z-index: 1;
+            transform: rotateY(180deg); /* 背面默认旋转180度 */
+            background-image: linear-gradient(to left, #e3e3e3 0%, #fdfbf7 10%); /* 右侧阴影 */
+        }
+
+        /* 内容样式 */
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 14px;
+            text-align: justify;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 15px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* 封面特殊样式 */
+        #p1 .front {
+            background-color: #8e44ad;
+            color: white;
+            background-image: none;
+            border: 2px solid #6c3483;
+        }
+        #p1 .front h2 {
+            color: white;
+            font-size: 24px;
+        }
+        #p1 .front p {
+            color: #e0e0e0;
+        }
+
+        /* 封底特殊样式 */
+        #p4 .back {
+            background-color: #8e44ad;
+            color: white;
+            background-image: none;
+            border: 2px solid #6c3483;
+        }
+
+        /* 翻页状态类 */
+        .flipped {
+            transform: rotateY(-180deg);
+        }
+
+        /* 层级控制：确保未翻开的纸张正确堆叠 */
+        #p1 { z-index: 4; }
+        #p2 { z-index: 3; }
+        #p3 { z-index: 2; }
+        #p4 { z-index: 1; }
+
+        /* 提示文字 */
+        .hint {
+            position: absolute;
+            bottom: 30px;
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="book">
+        <!-- 第一张纸 (封面 + 第1页) -->
+        <div class="paper" id="p1">
+            <div class="front">
+                <h2>我的日记本</h2>
+                <p>点击右下角开始阅读</p>
+                <span class="page-number">封面</span>
+            </div>
+            <div class="back">
+                <h2>第一章</h2>
+                <p>今天是学习前端的一天。CSS3 的 3D 变换非常神奇，通过 rotateY 和 perspective 可以创造出逼真的物理效果。</p>
+                <span class="page-number">1</span>
+            </div>
+        </div>
+
+        <!-- 第二张纸 (第2页 + 第3页) -->
+        <div class="paper" id="p2">
+            <div class="front">
+                <h2>第二章</h2>
+                <p>关键在于 transform-origin 设置为 left，这样元素就会像门一样绕着左边缘旋转。同时要注意 z-index 的管理。</p>
+                <span class="page-number">2</span>
+            </div>
+            <div class="back">
+                <h2>第三章</h2>
+                <p>当纸张翻转过去后，它的背面需要旋转 180 度才能正常显示文字。这就是 backface-visibility 的作用。</p>
+                <span class="page-number">3</span>
+            </div>
+        </div>
+
+        <!-- 第三张纸 (第4页 + 第5页) -->
+        <div class="paper" id="p3">
+            <div class="front">
+                <h2>第四章</h2>
+                <p>我们可以添加贝塞尔曲线 cubic-bezier 来让翻页动作看起来更有质感，模拟真实纸张翻动时的加速和减速。</p>
+                <span class="page-number">4</span>
+            </div>
+            <div class="back">
+                <h2>结语</h2>
+                <p>感谢阅读！希望这个小 Demo 能给你带来灵感。</p>
+                <span class="page-number">5</span>
+            </div>
+        </div>
+        
+         <!-- 第四张纸 (封底) -->
+         <div class="paper" id="p4">
+            <div class="front">
+               <p style="text-align:center; margin-top:50px;">-- 完 --</p>
+            </div>
+            <div class="back">
+                <h2>谢谢观看</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="hint">点击书页进行翻阅</div>
+
+    <script>
+        // 获取所有纸张元素
+        const papers = document.querySelectorAll('.paper');
+        const totalPapers = papers.length;
+
+        // 为每张纸添加点击事件
+        papers.forEach((paper, index) => {
+            paper.addEventListener('click', function() {
+                // 如果当前纸张已经翻过去了，就翻回来
+                if (this.classList.contains('flipped')) {
+                    this.classList.remove('flipped');
+                    // 调整 z-index 以确保翻回来时盖住下面的纸
+                    // 这里使用简单的延时来避免视觉闪烁，实际项目中可能需要更复杂的 z-index 管理
+                    setTimeout(() => {
+                        this.style.zIndex = totalPapers - index;
+                    }, 500); // 等待动画过半
+                } 
+                // 如果当前纸张没翻过去，就翻过去
+                else {
+                    this.style.zIndex = totalPapers + index; // 提高层级，确保翻动时在顶层
+                    this.classList.add('flipped');
+                }
+            });
+        });
+        
+        // 初始化 z-index
+        papers.forEach((paper, index) => {
+            paper.style.zIndex = totalPapers - index;
+        });
+    </script>
+</body>
+</html>

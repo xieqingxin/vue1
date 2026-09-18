@@ -13,9 +13,13 @@
         </span>
         <span>自律计划任务平台</span>
       </div>
-      <div class="user-info">
-        <button class="link-btn" @click="router.push('/profile')">个人中心</button>
-        <button class="link-btn" @click="onLogout">退出登录</button>
+      <div class="topbar__right">
+        <!-- 顶部导航组件：首页 / 公告 / 关于 -->
+        <TopNav />
+        <div class="user-info">
+          <button class="link-btn" @click="router.push('/profile')">个人中心</button>
+          <button class="link-btn" @click="onLogout">退出登录</button>
+        </div>
       </div>
     </header>
 
@@ -79,6 +83,7 @@ import { useRouter } from 'vue-router'
 import { getProfile, listTasks } from '../api/user'
 import { useUserStore } from '../store/user'
 import TaskList from '../components/TaskList.vue'
+import TopNav from '../components/TopNav.vue'
 import sceneImg from '../assets/bg/home.jpg' // 主页场景背景：桌面俯拍实景（与添加页同风格）
 
 const router = useRouter()
@@ -221,6 +226,12 @@ onMounted(() => {
   color: #fff;
   display: grid;
   place-items: center;
+}
+
+.topbar__right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .user-info {
@@ -454,6 +465,12 @@ onMounted(() => {
 
 .stagger > * {
   animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (max-width: 860px) {
+  .brand {
+    display: none;
+  }
 }
 
 @media (max-width: 640px) {
