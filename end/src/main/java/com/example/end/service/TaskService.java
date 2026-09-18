@@ -1,8 +1,8 @@
 package com.example.end.service;
 
-import com.example.end.dao.TaskDao;
 import com.example.end.dto.TaskDTO;
 import com.example.end.entity.Task;
+import com.example.end.mapper.TaskMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,10 +16,10 @@ public class TaskService {
     /** 允许的任务类型 */
     private static final List<String> TASK_TYPES = Arrays.asList("exercise", "work", "study", "life", "other");
 
-    private final TaskDao taskDao;
+    private final TaskMapper taskMapper;
 
-    public TaskService(TaskDao taskDao) {
-        this.taskDao = taskDao;
+    public TaskService(TaskMapper taskMapper) {
+        this.taskMapper = taskMapper;
     }
 
     public Long create(TaskDTO dto, Long userId) {
@@ -39,20 +39,21 @@ public class TaskService {
         task.setEndTime(dto.getEndTime());
         task.setReward(dto.getReward() == null ? "" : dto.getReward().trim());
         task.setStatus(0);
-        return taskDao.insert(task);
+        taskMapper.insert(task);
+        return task.getId();
     }
 
     public List<Task> listByUser(Long userId) {
         // 查询前先刷新该用户的过期状态，保证列表展示准确
-        taskDao.markExpiredByUser(userId);
-        return taskDao.listByUser(userId);
+        taskMapper.markExpiredByUser(userId);
+        return taskMapper.listByUser(userId);
     }
 
     public void updateStatus(Long id, Long userId, Integer status) {
         if (status == null || (status != 0 && status != 1)) {
             throw new IllegalArgumentException("状态值只能是 0（进行中）或 1（已完成）");
         }
-        Task task = taskDao.findById(id);
+        Task task = taskMapper.findById(id);
         if (task == null) {
             throw new IllegalArgumentException("任务不存在");
         }
@@ -68,22 +69,22 @@ public class TaskService {
         if (status == 1 && task.getEndTime() != null && LocalDateTime.now().isAfter(task.getEndTime())) {
             throw new IllegalArgumentException("任务已超过截止时间，已过期，不能完成");
         }
-        taskDao.updateStatus(id, userId, status);
+        taskMapper.updateStatus(id, userId, status);
     }
 
     /** 将超时未完成的任务置为已过期，由定时任务调用 */
     public int refreshExpired() {
-        return taskDao.markExpired();
+        return taskMapper.markExpired();
     }
 
     public void delete(Long id, Long userId) {
-        Task task = taskDao.findById(id);
+        Task task = taskMapper.findById(id);
         if (task == null) {
             throw new IllegalArgumentException("任务不存在");
         }
         if (!task.getUserId().equals(userId)) {
             throw new IllegalArgumentException("无权操作该任务");
         }
-        taskDao.delete(id, userId);
+        taskMapper.delete(id, userId);
     }
 }

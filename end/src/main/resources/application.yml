@@ -18,6 +18,12 @@ spring:
       write-dates-as-timestamps: false
     time-zone: Asia/Shanghai
 
+mybatis:
+  mapper-locations: classpath:/mapper/*Mapper.xml
+  type-aliases-package: com.example.end.entity
+  configuration:
+    map-underscore-to-camel-case: true
+
 jwt:
   secret: vue-user-secret-key-2026
   expire-hours: 24

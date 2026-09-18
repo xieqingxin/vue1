@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.end.mapper.TaskMapper">
+
+    <insert id="insert" parameterType="Task" useGeneratedKeys="true" keyProperty="id">
+        insert into `task`(user_id, name, content, type, start_time, end_time, reward, status)
+        values(#{userId}, #{name}, #{content}, #{type}, #{startTime}, #{endTime}, #{reward}, #{status})
+    </insert>
+
+    <select id="findById" resultType="Task">
+        select id, user_id, name, content, type, start_time, end_time, reward, status, completed_at, created_at
+        from `task` where id = #{id}
+    </select>
+
+    <select id="listByUser" resultType="Task">
+        select id, user_id, name, content, type, start_time, end_time, reward, status, completed_at, created_at
+        from `task` where user_id = #{userId} order by status asc, end_time asc, id desc
+    </select>
+
+    <update id="updateStatus">
+        update `task`
+        <set>
+            status = #{status},
+            <if test="status == 1">
+                completed_at = NOW(),
+            </if>
+        </set>
+        where id = #{id} and user_id = #{userId}
+    </update>
+
+    <update id="markExpired">
+        update `task` set status = 2 where status = 0 and end_time &lt; NOW()
+    </update>
+
+    <update id="markExpiredByUser">
+        update `task` set status = 2 where status = 0 and end_time &lt; NOW() and user_id = #{userId}
+    </update>
+
+    <delete id="delete">
+        delete from `task` where id = #{id} and user_id = #{userId}
+    </delete>
+
+</mapper>

@@ -1,7 +1,7 @@
 package com.example.end.service;
 
-import com.example.end.dao.FileDao;
 import com.example.end.entity.FileEntity;
+import com.example.end.mapper.FileMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,10 +15,10 @@ import java.util.Map;
 @Service
 public class FileService {
 
-    private final FileDao fileDao;
+    private final FileMapper fileMapper;
 
-    public FileService(FileDao fileDao) {
-        this.fileDao = fileDao;
+    public FileService(FileMapper fileMapper) {
+        this.fileMapper = fileMapper;
     }
 
     public Long upload(MultipartFile file, Long userId) throws IOException {
@@ -31,11 +31,12 @@ public class FileService {
         entity.setContentType(file.getContentType());
         entity.setSize(file.getSize());
         entity.setContent(file.getBytes());
-        return fileDao.insert(entity);
+        fileMapper.insert(entity);
+        return entity.getId();
     }
 
     public FileEntity getInfo(Long id) {
-        FileEntity f = fileDao.findById(id);
+        FileEntity f = fileMapper.findById(id);
         if (f == null) {
             throw new IllegalArgumentException("文件不存在");
         }
@@ -43,12 +44,12 @@ public class FileService {
     }
 
     public byte[] getContent(Long id) {
-        return fileDao.findContent(id);
+        return fileMapper.findContent(id);
     }
 
     public List<Map<String, Object>> listByUser(Long userId) {
         List<Map<String, Object>> result = new ArrayList<>();
-        for (FileEntity f : fileDao.listByUser(userId)) {
+        for (FileEntity f : fileMapper.listByUser(userId)) {
             Map<String, Object> m = new HashMap<>();
             m.put("id", f.getId());
             m.put("name", f.getName());
