@@ -13,9 +13,13 @@
         </span>
         <span>自律计划任务平台</span>
       </div>
-      <div class="user-info">
-        <button class="link-btn" @click="router.push('/profile')">个人中心</button>
-        <button class="link-btn" @click="onLogout">退出登录</button>
+      <div class="topbar__right">
+        <!-- 顶部导航组件：首页 / 公告 / 关于 -->
+        <TopNav />
+        <div class="user-info">
+          <button class="link-btn" @click="router.push('/profile')">个人中心</button>
+          <button class="link-btn" @click="onLogout">退出登录</button>
+        </div>
       </div>
     </header>
 
@@ -127,6 +131,7 @@ import { useRouter } from 'vue-router'
 import { getProfile, listTasks } from '../api/user'
 import { useUserStore } from '../store/user'
 import TaskList from '../components/TaskList.vue'
+import TopNav from '../components/TopNav.vue'
 import sceneImg from '../assets/bg/home.jpg' // 主页场景背景：桌面俯拍实景（与添加页同风格）
 
 const router = useRouter()
@@ -269,6 +274,12 @@ onMounted(() => {
   color: #fff;
   display: grid;
   place-items: center;
+}
+
+.topbar__right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .user-info {
@@ -504,86 +515,10 @@ onMounted(() => {
   animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* ---------- 弹窗 ---------- */
-.modal-mask {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  background: rgba(23, 50, 44, 0.45);
-  backdrop-filter: blur(3px);
-  display: grid;
-  place-items: center;
-  padding: 20px;
-  animation: fadeIn 0.2s ease both;
-}
-
-.modal {
-  width: min(400px, 100%);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-md);
-  padding: 24px;
-  animation: pop 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.modal__title {
-  font-size: 17px;
-  font-weight: 650;
-  color: var(--ink);
-  margin-bottom: 10px;
-}
-
-.modal__text {
-  font-size: 14px;
-  color: var(--ink-soft);
-  line-height: 1.7;
-}
-
-.modal__text strong {
-  color: var(--ink);
-}
-
-.modal__actions {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.modal--praise {
-  text-align: center;
-}
-
-.praise__icon {
-  font-size: 44px;
-  line-height: 1;
-  margin-bottom: 12px;
-  animation: bounce 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
-}
-
-.praise__text {
-  font-size: 15px;
-}
-
-.modal--praise .modal__actions {
-  justify-content: center;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes pop {
-  from { opacity: 0; transform: translateY(14px) scale(0.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes bounce {
-  0% { transform: scale(0.4); }
-  60% { transform: scale(1.15); }
-  100% { transform: scale(1); }
+@media (max-width: 860px) {
+  .brand {
+    display: none;
+  }
 }
 
 @media (max-width: 640px) {

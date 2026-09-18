@@ -6,6 +6,8 @@ import Home from '../views/Home.vue'
 import AddTask from '../views/AddTask.vue'
 import TaskDetail from '../views/TaskDetail.vue'
 import Profile from '../views/Profile.vue'
+import Announcements from '../views/Announcements.vue'
+import About from '../views/About.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -16,7 +18,9 @@ const router = createRouter({
     { path: '/home', name: 'home', component: Home, meta: { requiresAuth: true } },
     { path: '/add/:type', name: 'addTask', component: AddTask, meta: { requiresAuth: true } },
     { path: '/task/:id', name: 'taskDetail', component: TaskDetail, meta: { requiresAuth: true } },
-    { path: '/profile', name: 'profile', component: Profile, meta: { requiresAuth: true } }
+    { path: '/profile', name: 'profile', component: Profile, meta: { requiresAuth: true } },
+    { path: '/announcements', name: 'announcements', component: Announcements, meta: { requiresAuth: true } },
+    { path: '/about', name: 'about', component: About, meta: { requiresAuth: true } }
   ]
 })
 
