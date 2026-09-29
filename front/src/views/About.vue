@@ -1,11 +1,5 @@
 <template>
   <div class="about-page">
-    <!-- 场景背景：与个人中心同款（实景照片 + 提亮蒙层 + Ken Burns） -->
-    <div class="scene" aria-hidden="true">
-      <img class="scene__img" :src="sceneImg" alt="" />
-      <span class="scene__scrim"></span>
-    </div>
-
     <header class="topbar">
       <div class="topbar__left">
         <button class="back-btn" @click="goBack">← 返回个人中心</button>
@@ -23,7 +17,7 @@
           <p>把每一个小目标贴成便利贴，一件一件完成它们。</p>
           <div class="about-hero__tags">
             <el-tag type="success" effect="light">v0.1.0</el-tag>
-            <el-tag type="primary" effect="light">教学练习项目</el-tag>
+            <el-tag type="primary" effect="light">个人项目</el-tag>
           </div>
         </div>
       </el-card>
@@ -34,7 +28,7 @@
             <span class="card-title">🎯 项目简介</span>
           </template>
           <p>
-            这是一个「登录注册 + 任务管理」的全栈练习项目：支持按类型添加任务、设定起止时间、标记完成，
+            这是一个「登录注册 + 任务管理」的个人项目：支持按类型添加任务、设定起止时间、标记完成，
             并配有个人中心的统计面板与任务完成日历，还集成了文件上传功能。
           </p>
         </el-card>
@@ -54,7 +48,7 @@
           <template #header>
             <span class="card-title">💬 说明</span>
           </template>
-          <el-alert title="本项目用于学习交流" type="info" :closable="false" show-icon />
+          <el-alert title="本项目为个人开发项目" type="info" :closable="false" show-icon />
         </el-card>
       </section>
     </main>
@@ -64,7 +58,6 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import { InfoFilled } from '@element-plus/icons-vue'
-import sceneImg from '../assets/bg/home.jpg' // 关于页场景背景：任务墙实景
 
 const router = useRouter()
 
@@ -77,38 +70,6 @@ function goBack() {
 .about-page {
   min-height: 100vh;
   min-height: 100svh;
-  background:
-    radial-gradient(720px 320px at 85% -10%, rgba(22, 160, 133, 0.1), transparent 65%),
-    radial-gradient(560px 280px at -5% 0%, rgba(125, 211, 252, 0.14), transparent 60%),
-    var(--canvas);
-}
-
-/* ---------- 场景背景 ---------- */
-.scene {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  background: linear-gradient(150deg, #eef1f4 0%, #dde3ea 55%, #c7d0da 100%);
-}
-
-.scene__img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  animation: kenburns 26s ease-in-out infinite alternate;
-}
-
-.scene__scrim {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(90% 80% at 50% 40%, rgba(250, 251, 252, 0.5) 0%, rgba(70, 80, 95, 0.3) 100%);
-}
-
-@keyframes kenburns {
-  from { transform: scale(1.04); }
-  to { transform: scale(1.12) translate3d(-1.5%, -1.5%, 0); }
 }
 
 /* ---------- 顶栏 ---------- */

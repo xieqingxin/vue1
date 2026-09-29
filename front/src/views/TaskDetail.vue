@@ -1,11 +1,5 @@
 <template>
   <div class="detail-page" :class="'page--' + taskType">
-    <!-- 场景背景：按任务类型配图（与添加页同一风格） -->
-    <div class="scene" aria-hidden="true">
-      <img class="scene__img" :src="sceneImg" alt="" />
-      <span class="scene__scrim"></span>
-    </div>
-
     <header class="topbar">
       <div class="topbar__left">
         <button class="back-btn" @click="goBack">← 返回任务列表</button>
@@ -143,8 +137,6 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { listTasks, updateTaskStatus, deleteTask } from '../api/user'
-// 各类型场景背景：与添加页保持一致（本地资源，见 src/assets/scenes.js）
-import { SCENE_IMGS } from '../assets/scenes'
 
 const route = useRoute()
 const router = useRouter()
@@ -169,7 +161,6 @@ const TASK_TYPES = {
 
 const taskType = computed(() => (task.value && task.value.type) || 'other')
 const typeMeta = computed(() => TASK_TYPES[taskType.value] || TASK_TYPES.other)
-const sceneImg = computed(() => SCENE_IMGS[taskType.value] || SCENE_IMGS.other)
 
 const statusKey = computed(() => {
   if (!task.value) return 'doing'
@@ -316,43 +307,7 @@ onUnmounted(() => {
 .detail-page {
   min-height: 100vh;
   min-height: 100svh;
-  background: var(--canvas);
 }
-
-/* ---------- 场景背景（按任务类型配色，与添加页同一风格） ---------- */
-.scene {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  background: var(--scene-bg);
-}
-
-.scene__img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  animation: kenburns 26s ease-in-out infinite alternate;
-}
-
-/* 提亮蒙层，保证纸面内容可读 */
-.scene__scrim {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(90% 80% at 50% 40%, var(--scrim-a) 0%, var(--scrim-b) 100%);
-}
-
-@keyframes kenburns {
-  from { transform: scale(1.04); }
-  to { transform: scale(1.12) translate3d(-1.5%, -1.5%, 0); }
-}
-
-.page--exercise { --scene-bg: linear-gradient(150deg, #fdeadd 0%, #f8d6bd 55%, #f0bd97 100%); --scrim-a: rgba(255, 248, 242, 0.4); --scrim-b: rgba(140, 80, 40, 0.28); }
-.page--work { --scene-bg: linear-gradient(150deg, #e8eef7 0%, #d5e0ef 55%, #c0cfe4 100%); --scrim-a: rgba(248, 251, 255, 0.42); --scrim-b: rgba(58, 82, 120, 0.3); }
-.page--study { --scene-bg: linear-gradient(150deg, #f3e7c9 0%, #e8d5a8 55%, #d9c08a 100%); --scrim-a: rgba(255, 251, 240, 0.38); --scrim-b: rgba(120, 96, 56, 0.28); }
-.page--life { --scene-bg: linear-gradient(150deg, #e6f4ef 0%, #cfe9e0 55%, #b5dccf 100%); --scrim-a: rgba(246, 253, 250, 0.42); --scrim-b: rgba(40, 90, 80, 0.28); }
-.page--other { --scene-bg: linear-gradient(150deg, #eef1f4 0%, #dde3ea 55%, #c7d0da 100%); --scrim-a: rgba(250, 251, 252, 0.42); --scrim-b: rgba(70, 80, 95, 0.28); }
 
 /* ---------- 顶栏 ---------- */
 .topbar {
@@ -473,11 +428,11 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
-.hero.accent-exercise { --type-color: #e2703a; --type-soft: rgba(226, 112, 58, 0.12); }
-.hero.accent-work    { --type-color: #2563eb; --type-soft: rgba(37, 99, 235, 0.1); }
-.hero.accent-study   { --type-color: #7c3aed; --type-soft: rgba(124, 58, 237, 0.1); }
-.hero.accent-life    { --type-color: #0d9488; --type-soft: rgba(13, 148, 136, 0.1); }
-.hero.accent-other   { --type-color: #64748b; --type-soft: rgba(100, 116, 139, 0.1); }
+.hero.accent-exercise { --type-color: #e8895a; --type-soft: rgba(232, 137, 90, 0.12); }
+.hero.accent-work    { --type-color: #5b8def; --type-soft: rgba(91, 141, 239, 0.12); }
+.hero.accent-study   { --type-color: #8b7af0; --type-soft: rgba(139, 122, 240, 0.12); }
+.hero.accent-life    { --type-color: #3bb88c; --type-soft: rgba(59, 184, 140, 0.13); }
+.hero.accent-other   { --type-color: #8a94a0; --type-soft: rgba(138, 148, 160, 0.12); }
 
 .hero__badges {
   display: flex;
@@ -504,8 +459,8 @@ onUnmounted(() => {
 }
 
 .badge--type {
-  color: #fff;
-  background: var(--type-color, var(--accent));
+  color: var(--type-color, var(--accent-deep));
+  background: var(--type-soft, var(--accent-soft));
 }
 
 .badge--doing {
@@ -691,22 +646,25 @@ onUnmounted(() => {
 .btn {
   flex: 1;
   height: 46px;
-  border: none;
-  border-radius: 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
   font-size: 14.5px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  transition: background 0.18s, color 0.18s, transform 0.18s, box-shadow 0.18s;
+  transition: background 0.18s, color 0.18s, transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--ink-soft);
 }
 
 .btn--primary {
-  background: var(--accent);
+  background: rgba(121, 183, 166, 0.9);
+  border-color: rgba(121, 183, 166, 0.5);
   color: #fff;
-  box-shadow: 0 8px 18px -10px rgba(22, 160, 133, 0.7);
+  box-shadow: 0 14px 28px -16px rgba(79, 148, 138, 0.7);
 }
 
 .btn--primary:hover:not(:disabled) {
-  background: var(--accent-deep);
+  background: var(--accent);
   transform: translateY(-1px);
 }
 
@@ -717,19 +675,19 @@ onUnmounted(() => {
 }
 
 .btn--danger {
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.6);
   border: 1px solid var(--line);
   color: var(--ink-soft);
 }
 
 .btn--danger:hover {
-  border-color: #ffd9c2;
+  border-color: rgba(217, 119, 106, 0.35);
   color: var(--danger);
   background: var(--danger-soft);
 }
 
 .btn--ghost {
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.6);
   border: 1px solid var(--line);
   color: var(--ink-soft);
   flex: 0 0 auto;

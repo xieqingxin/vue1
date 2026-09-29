@@ -1,11 +1,5 @@
 <template>
   <div class="profile-page">
-    <!-- 场景背景：与主页/添加页同款（实景照片 + 提亮蒙层 + Ken Burns） -->
-    <div class="scene" aria-hidden="true">
-      <img class="scene__img" :src="sceneImg" alt="" />
-      <span class="scene__scrim"></span>
-    </div>
-
     <header class="topbar">
       <div class="topbar__left">
         <button class="back-btn" @click="goBack">← 返回任务列表</button>
@@ -95,7 +89,6 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { listTasks } from '../api/user'
 import { useUserStore } from '../store/user'
-import sceneImg from '../assets/bg/profile.jpg' // 个人中心场景背景：明亮书桌俯拍实景
 
 const router = useRouter()
 const store = useUserStore()
@@ -204,39 +197,6 @@ onMounted(() => {
 .profile-page {
   min-height: 100vh;
   min-height: 100svh;
-  background:
-    radial-gradient(720px 320px at 85% -10%, rgba(22, 160, 133, 0.1), transparent 65%),
-    radial-gradient(560px 280px at -5% 0%, rgba(125, 211, 252, 0.14), transparent 60%),
-    var(--canvas);
-}
-
-/* ---------- 场景背景 ---------- */
-.scene {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  background: linear-gradient(150deg, #eef1f4 0%, #dde3ea 55%, #c7d0da 100%);
-}
-
-.scene__img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  animation: kenburns 26s ease-in-out infinite alternate;
-}
-
-/* 轻微提亮蒙层，保证纸面内容可读 */
-.scene__scrim {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(90% 80% at 50% 40%, rgba(250, 251, 252, 0.5) 0%, rgba(70, 80, 95, 0.3) 100%);
-}
-
-@keyframes kenburns {
-  from { transform: scale(1.04); }
-  to { transform: scale(1.12) translate3d(-1.5%, -1.5%, 0); }
 }
 
 /* ---------- 顶栏 ---------- */
@@ -575,6 +535,13 @@ onMounted(() => {
 
 .calendar__flower--ghost {
   visibility: hidden;
+}
+
+.profile-hero,
+.stats,
+.calendar {
+  backdrop-filter: blur(20px) saturate(1.15);
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
 }
 
 @keyframes rise {
