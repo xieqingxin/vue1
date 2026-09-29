@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.end.mapper.TeamTaskMapper">
+
+    <insert id="insertTask" parameterType="TeamTask" useGeneratedKeys="true" keyProperty="id">
+        insert into `team_task`(team_id, assignee_type, name, content, type, start_time, end_time, reward, creator_id, overall_status, is_deleted)
+        values(#{teamId}, #{assigneeType}, #{name}, #{content}, #{type}, #{startTime}, #{endTime}, #{reward}, #{creatorId}, 'ongoing', 0)
+    </insert>
+
+    <select id="findTaskById" resultType="TeamTask">
+        select id, team_id, assignee_type, name, content, type, start_time, end_time, reward, creator_id, overall_status, is_deleted, create_time
+        from `team_task` where id = #{id}
+    </select>
+
+    <update id="updateTask" parameterType="TeamTask">
+        update `team_task`
+        <set>
+            name = #{name},
+            content = #{content},
+            type = #{type},
+            assignee_type = #{assigneeType},
+            start_time = #{startTime},
+            end_time = #{endTime},
+            reward = #{reward},
+        </set>
+        where id = #{id}
+    </update>
+
+    <update id="softDelete">
+        update `team_task` set is_deleted = 1 where id = #{id}
+    </update>
+
+    <insert id="insertAssignee">
+        insert into `team_task_assignee`(task_id, user_id) values(#{taskId}, #{userId})
+    </insert>
+
+    <delete id="deleteAssignees">
+        delete from `team_task_assignee` where task_id = #{taskId}
+    </delete>
+
+    <select id="listAssigneeIds" resultType="long">
+        select user_id from `team_task_assignee` where task_id = #{taskId}
+    </select>
+
+    <delete id="deleteAssigneeByUserAndTeam">
+        delete from `team_task_assignee`
+        where user_id = #{userId}
+          and task_id in (select id from `team_task` where team_id = #{teamId})
+    </delete>
+
+    <select id="listTeamTasksWithStats" resultType="map">
+        select tt.id, tt.team_id, tt.assignee_type, tt.name, tt.content, tt.type,
+               tt.start_time, tt.end_time, tt.reward, tt.creator_id, tt.overall_status, tt.create_time,
+               (select count(*) from `team_member` m where m.team_id = tt.team_id and m.status = 'approved') as member_count,
+               (select count(*) from `team_task_completion` c where c.task_id = tt.id) as completed_count,
+               (select count(*) from `team_task_completion` c where c.task_id = tt.id and c.user_id = #{userId}) as my_completed
+        from `team_task` tt
+        where tt.team_id = #{teamId} and tt.is_deleted = 0
+        order by tt.create_time desc
+    </select>
+
+    <insert id="insertCompletion">
+        insert into `team_task_completion`(task_id, user_id, complete_time) values(#{taskId}, #{userId}, NOW())
+    </insert>
+
+    <delete id="deleteCompletionByUserAndTeam">
+        delete from `team_task_completion`
+        where user_id = #{userId}
+          and task_id in (select id from `team_task` where team_id = #{teamId})
+    </delete>
+
+    <select id="countCompletion" resultType="int">
+        select count(*) from `team_task_completion` where task_id = #{taskId} and user_id = #{userId}
+    </select>
+
+    <update id="updateOverallStatus">
+        update `team_task` set overall_status = #{overallStatus} where id = #{id}
+    </update>
+
+    <select id="listCompletions" resultType="map">
+        select c.user_id, c.complete_time, u.nickname, u.username
+        from `team_task_completion` c
+        left join `user` u on u.id = c.user_id
+        where c.task_id = #{taskId}
+        order by c.complete_time asc
+    </select>
+
+    <select id="listMyVisibleTeamTasks" resultType="map">
+        select tt.id, tt.team_id, tt.assignee_type, tt.name, tt.content, tt.type,
+               tt.start_time, tt.end_time, tt.reward, tt.creator_id, tt.overall_status, tt.create_time,
+               t.name as team_name,
+               (select count(*) from `team_task_completion` c where c.task_id = tt.id and c.user_id = #{userId}) as my_completed,
+               (select c.complete_time from `team_task_completion` c where c.task_id = tt.id and c.user_id = #{userId} limit 1) as my_complete_time
+        from `team_task` tt
+        join `team` t on t.id = tt.team_id and t.status = 'normal'
+        where tt.is_deleted = 0
+          and (tt.assignee_type = 'all' or exists (
+                select 1 from `team_task_assignee` a where a.task_id = tt.id and a.user_id = #{userId}))
+        order by tt.create_time desc
+    </select>
+
+</mapper>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.end.mapper.TeamMapper">
+
+    <insert id="insertTeam" parameterType="Team" useGeneratedKeys="true" keyProperty="id">
+        insert into `team`(name, leader_id, max_size, category, status)
+        values(#{name}, #{leaderId}, #{maxSize}, #{category}, 'normal')
+    </insert>
+
+    <select id="findTeamById" resultType="Team">
+        select id, name, leader_id, max_size, category, status, create_time
+        from `team` where id = #{id}
+    </select>
+
+    <update id="updateTeamStatus">
+        update `team` set status = #{status} where id = #{id}
+    </update>
+
+    <update id="updateLeader">
+        update `team` set leader_id = #{leaderId} where id = #{id}
+    </update>
+
+    <insert id="insertMember" parameterType="TeamMember">
+        insert into `team_member`(team_id, user_id, role, status, join_time)
+        values(#{teamId}, #{userId}, #{role}, #{status}, NOW())
+    </insert>
+
+    <select id="findMember" resultType="TeamMember">
+        select team_id, user_id, role, status, join_time
+        from `team_member` where team_id = #{teamId} and user_id = #{userId}
+    </select>
+
+    <delete id="deleteMember">
+        delete from `team_member` where team_id = #{teamId} and user_id = #{userId}
+    </delete>
+
+    <update id="updateMemberStatus">
+        update `team_member` set status = #{status}, join_time = NOW()
+        where team_id = #{teamId} and user_id = #{userId}
+    </update>
+
+    <update id="updateMemberRole">
+        update `team_member` set role = #{role}
+        where team_id = #{teamId} and user_id = #{userId}
+    </update>
+
+    <select id="countMembers" resultType="int">
+        select count(*) from `team_member` where team_id = #{teamId} and status = 'approved'
+    </select>
+
+    <select id="listMembers" resultType="map">
+        select m.user_id, m.role, m.join_time, u.nickname, u.username
+        from `team_member` m
+        left join `user` u on u.id = m.user_id
+        where m.team_id = #{teamId} and m.status = 'approved'
+        order by (m.role = 'leader') desc, m.join_time asc
+    </select>
+
+    <select id="listPending" resultType="map">
+        select m.user_id, m.join_time, u.nickname, u.username
+        from `team_member` m
+        left join `user` u on u.id = m.user_id
+        where m.team_id = #{teamId} and m.status = 'pending'
+        order by m.join_time asc
+    </select>
+
+    <select id="searchTeams" resultType="map">
+        select t.id, t.name, t.category, t.max_size, t.leader_id,
+               (select count(*) from `team_member` m where m.team_id = t.id and m.status = 'approved') as member_count,
+               u.nickname as leader_nickname,
+               (select m.role from `team_member` m where m.team_id = t.id and m.user_id = #{userId}) as my_role,
+               (select m.status from `team_member` m where m.team_id = t.id and m.user_id = #{userId}) as my_status
+        from `team` t
+        left join `user` u on u.id = t.leader_id
+        where t.status = 'normal'
+        <if test="keyword != null and keyword != ''">
+            and t.name like concat('%', #{keyword}, '%')
+        </if>
+        <if test="category != null and category != ''">
+            and t.category = #{category}
+        </if>
+        order by member_count desc, t.id desc
+    </select>
+
+    <select id="recommendedTeams" resultType="map">
+        select t.id, t.name, t.category, t.max_size, t.leader_id,
+               (select count(*) from `team_member` m where m.team_id = t.id and m.status = 'approved') as member_count,
+               u.nickname as leader_nickname,
+               (select m.role from `team_member` m where m.team_id = t.id and m.user_id = #{userId}) as my_role,
+               (select m.status from `team_member` m where m.team_id = t.id and m.user_id = #{userId}) as my_status
+        from `team` t
+        left join `user` u on u.id = t.leader_id
+        where t.status = 'normal'
+        order by member_count desc, t.id desc
+        limit 20
+    </select>
+
+    <select id="listMyTeams" resultType="map">
+        select t.id, t.name, t.category, t.max_size, t.leader_id,
+               (select count(*) from `team_member` m where m.team_id = t.id and m.status = 'approved') as member_count,
+               u.nickname as leader_nickname,
+               m.role as my_role
+        from `team_member` m
+        join `team` t on t.id = m.team_id
+        left join `user` u on u.id = t.leader_id
+        where m.user_id = #{userId} and m.status = 'approved' and t.status = 'normal'
+        order by m.join_time desc
+    </select>
+
+</mapper>

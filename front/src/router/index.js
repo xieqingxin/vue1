@@ -8,6 +8,9 @@ import TaskDetail from '../views/TaskDetail.vue'
 import Profile from '../views/Profile.vue'
 import Announcements from '../views/Announcements.vue'
 import About from '../views/About.vue'
+import Teams from '../views/Teams.vue'
+import TeamDetail from '../views/TeamDetail.vue'
+import TeamTaskDetail from '../views/TeamTaskDetail.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -20,7 +23,10 @@ const router = createRouter({
     { path: '/task/:id', name: 'taskDetail', component: TaskDetail, meta: { requiresAuth: true } },
     { path: '/profile', name: 'profile', component: Profile, meta: { requiresAuth: true } },
     { path: '/announcements', name: 'announcements', component: Announcements, meta: { requiresAuth: true } },
-    { path: '/about', name: 'about', component: About, meta: { requiresAuth: true } }
+    { path: '/about', name: 'about', component: About, meta: { requiresAuth: true } },
+    { path: '/teams', name: 'teams', component: Teams, meta: { requiresAuth: true } },
+    { path: '/teams/:id', name: 'teamDetail', component: TeamDetail, meta: { requiresAuth: true } },
+    { path: '/teams/:teamId/tasks/:taskId', name: 'teamTaskDetail', component: TeamTaskDetail, meta: { requiresAuth: true } }
   ]
 })
 
