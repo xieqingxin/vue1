@@ -8,26 +8,29 @@
         :class="['type-' + (t.type || 'other'), { done: t.status === 1, expired: t.status === 2 }]"
         @click="router.push(`/task/${t.id}`)"
       >
-        <div class="task-card__main">
-          <div class="task-card__head">
-            <span class="task-status" :class="statusClass(t.status)">{{ statusLabel(t.status) }}</span>
-            <span class="task-type-tag" :class="'tag-' + (t.type || 'other')">
-              {{ typeLabel(t.type) }}
-            </span>
-            <h3 class="task-card__name">{{ t.name }}</h3>
-            <span class="task-card__reward">奖励 {{ t.reward }}</span>
-          </div>
-          <p v-if="t.content" class="task-card__content">{{ t.content }}</p>
-          <div class="task-card__meta">
-            <span>开始 {{ formatTime(t.startTime) }}</span>
-            <span class="dot">·</span>
-            <span>截止 {{ formatTime(t.endTime) }}</span>
-            <template v-if="t.status === 1 && t.completedAt">
-              <span class="dot">·</span>
-              <span class="meta-done">完成于 {{ formatTime(t.completedAt) }}</span>
-            </template>
-          </div>
+        <div class="task-card__head">
+          <span class="task-status" :class="statusClass(t.status)">{{ statusLabel(t.status) }}</span>
+          <span class="task-type-tag" :class="'tag-' + (t.type || 'other')">
+            <CategoryIcon :type="t.type || 'other'" />
+            {{ typeLabel(t.type) }}
+          </span>
+          <span class="task-card__reward">奖励 {{ t.reward }}</span>
         </div>
+
+        <h3 class="task-card__name">{{ t.name }}</h3>
+
+        <p v-if="t.content" class="task-card__content">{{ t.content }}</p>
+
+        <div class="task-card__meta">
+          <span>起 {{ formatTime(t.startTime) }}</span>
+          <span class="dot">·</span>
+          <span>止 {{ formatTime(t.endTime) }}</span>
+          <template v-if="t.status === 1 && t.completedAt">
+            <span class="dot">·</span>
+            <span class="meta-done">完成于 {{ formatTime(t.completedAt) }}</span>
+          </template>
+        </div>
+
         <!-- 操作区阻止冒泡，避免触发整卡跳转 -->
         <div class="task-card__actions" @click.stop>
           <button v-if="t.status === 0" class="act act--done" @click="askComplete(t)">标记完成</button>
@@ -43,7 +46,7 @@
         <div class="modal" role="dialog" aria-modal="true">
           <h3 class="modal__title">确认完成任务</h3>
           <p class="modal__text">
-            任务「<strong>{{ confirmTask.name }}</strong>」确认任务是否成？。
+            任务「<strong>{{ confirmTask.name }}</strong>」确认任务是否完成？
           </p>
           <div class="modal__actions">
             <button class="act" @click="closeConfirm">取消</button>
@@ -89,6 +92,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { updateTaskStatus, deleteTask } from '../api/user'
+import CategoryIcon from './CategoryIcon.vue'
 
 const props = defineProps({
   // 要展示的任务列表（由父组件负责筛选）
@@ -107,16 +111,16 @@ const deleting = ref(false)
 
 // 任务类型定义（与首页保持一致）
 const taskTypes = [
-  { label: '锻炼', value: 'exercise', icon: '🏃' },
-  { label: '工作', value: 'work', icon: '💼' },
-  { label: '学习', value: 'study', icon: '📚' },
-  { label: '生活', value: 'life', icon: '🏠' },
-  { label: '其他', value: 'other', icon: '📌' }
+  { label: '锻炼', value: 'exercise' },
+  { label: '工作', value: 'work' },
+  { label: '学习', value: 'study' },
+  { label: '生活', value: 'life' },
+  { label: '其他', value: 'other' }
 ]
 
 function typeLabel(v) {
   const tp = taskTypes.find((t) => t.value === (v || 'other'))
-  return tp ? `${tp.icon} ${tp.label}` : '📌 其他'
+  return tp ? tp.label : '其他'
 }
 
 function statusLabel(s) {
@@ -205,136 +209,57 @@ async function confirmDelete() {
 <style scoped>
 .task-list {
   list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+/* 任务卡片：现代扁平化，大白卡 + 极浅阴影 + 大圆角 */
+.task-card {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-/* 任务卡片：贴纸样式（彩色描边 + 硬阴影 + 轻微倾斜） */
-.task-card {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 10px;
   cursor: pointer;
   background: var(--surface);
-  border: 2px solid var(--tc, var(--accent));
-  border-radius: 16px;
-  padding: 16px 18px;
-  box-shadow: 3px 4px 0 rgba(23, 50, 44, 0.1);
-  transform: rotate(-0.45deg);
-  transition: box-shadow 0.18s, transform 0.18s;
-}
-
-.task-list li:nth-child(even) .task-card {
-  transform: rotate(0.5deg);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s;
 }
 
 .task-card:hover {
-  transform: rotate(0deg) translateY(-2px);
-  box-shadow: 3px 5px 0 rgba(23, 50, 44, 0.14), var(--shadow-md);
+  transform: translateY(-4px);
+  box-shadow: 0 22px 44px -24px rgba(96, 128, 118, 0.4);
 }
 
-/* 贴纸角落的小胶带 */
-.task-card::before {
-  content: '';
-  position: absolute;
-  top: -8px;
-  right: 22px;
-  width: 46px;
-  height: 16px;
-  background: rgba(255, 236, 153, 0.72);
-  transform: rotate(4deg);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-}
+/* 每个分类顶部一条淡淡的主题色描边 */
+.task-card.type-exercise { border-top: 3px solid var(--c-exercise, #e8895a); }
+.task-card.type-work { border-top: 3px solid var(--c-work, #5b8def); }
+.task-card.type-study { border-top: 3px solid var(--c-study, #8b7af0); }
+.task-card.type-life { border-top: 3px solid var(--c-life, #3bb88c); }
+.task-card.type-other { border-top: 3px solid var(--c-other, #8a94a0); }
 
-.task-card.done .task-card__name {
-  text-decoration: line-through;
-  color: var(--ink-faint);
-}
-
-/* 不同任务类型的贴纸颜色 */
-.task-card.type-exercise { --tc: #e2703a; }
-.task-card.type-work { --tc: #2563eb; }
-.task-card.type-life { --tc: #0d9488; }
-.task-card.type-other { --tc: #64748b; }
-
-/* 学习贴纸：纸张背景 */
-.task-card.type-study {
-  --tc: #7c3aed;
-  border-color: #e6dfc8;
-  border-radius: 6px;
-  background:
-    linear-gradient(90deg, transparent 0 14px, rgba(224, 138, 138, 0.5) 14px 15px, transparent 15px),
-    repeating-linear-gradient(transparent 0 27px, rgba(124, 58, 237, 0.12) 27px 28px),
-    #fffdf5;
-}
-
-.task-card.done {
-  --tc: #94a3b8;
-  opacity: 0.75;
-  background: var(--surface);
-}
-
-.task-card.expired {
-  --tc: #dc2626;
-  background: linear-gradient(90deg, rgba(220, 38, 38, 0.05), var(--surface) 42%);
-}
-
-.task-card.expired .task-card__name {
-  color: var(--ink-faint);
-}
-
-/* 任务类型标签 */
-.task-type-tag {
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 3px 9px;
-  border-radius: 6px;
-  flex-shrink: 0;
-}
-
-.task-type-tag.tag-exercise {
-  background: rgba(226, 112, 58, 0.12);
-  color: #c2551d;
-}
-
-.task-type-tag.tag-work {
-  background: rgba(37, 99, 235, 0.1);
-  color: #1d4ed8;
-}
-
-.task-type-tag.tag-study {
-  background: rgba(124, 58, 237, 0.1);
-  color: #6d28d9;
-}
-
-.task-type-tag.tag-life {
-  background: rgba(13, 148, 136, 0.1);
-  color: #0f766e;
-}
-
-.task-type-tag.tag-other {
-  background: rgba(100, 116, 139, 0.1);
-  color: #475569;
-}
-
-.task-card__main {
-  min-width: 0;
-}
+/* 分类主题色（供标签与图标着色，与首页一致） */
+.task-card.type-exercise { --tone: #e8895a; --tone-soft: #fbe9dc; }
+.task-card.type-work { --tone: #5b8def; --tone-soft: #e6eefd; }
+.task-card.type-study { --tone: #8b7af0; --tone-soft: #ece6fc; }
+.task-card.type-life { --tone: #3bb88c; --tone-soft: #e1f5ec; }
+.task-card.type-other { --tone: #8a94a0; --tone-soft: #eff2f5; }
 
 .task-card__head {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .task-status {
-  font-size: 11.5px;
-  font-weight: 650;
-  padding: 3px 9px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
   border-radius: 999px;
   flex-shrink: 0;
 }
@@ -345,40 +270,69 @@ async function confirmDelete() {
 }
 
 .task-status.is-done {
-  background: #eef2f6;
-  color: #64748b;
+  background: var(--ok-soft);
+  color: var(--ok);
 }
 
 .task-status.is-expired {
-  background: #fee2e2;
-  color: #dc2626;
+  background: var(--danger-soft);
+  color: var(--danger);
 }
 
-.task-card__name {
-  font-size: 15.5px;
-  font-weight: 650;
-  color: var(--ink);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.task-type-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--tone-soft, #eef2f5);
+  color: var(--tone, #64748b);
+  flex-shrink: 0;
+}
+
+.task-type-tag :deep(svg) {
+  width: 14px;
+  height: 14px;
 }
 
 .task-card__reward {
   margin-left: auto;
-  font-size: 13.5px;
-  font-weight: 650;
-  color: var(--accent-deep);
-  background: var(--accent-soft);
-  padding: 3px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #bd8a4a;
+  background: #f6ecdb;
+  padding: 4px 12px;
   border-radius: 999px;
   flex-shrink: 0;
 }
 
+.task-card__name {
+  font-size: 16.5px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.task-card.done .task-card__name {
+  text-decoration: line-through;
+  color: var(--ink-faint);
+}
+
+.task-card.expired .task-card__name {
+  color: var(--ink-faint);
+}
+
 .task-card__content {
-  margin-top: 6px;
   font-size: 13.5px;
   color: var(--ink-soft);
-  line-height: 1.6;
+  line-height: 1.65;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -387,16 +341,16 @@ async function confirmDelete() {
 }
 
 .task-card__meta {
-  margin-top: 8px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
+  flex-wrap: wrap;
   font-size: 12.5px;
   color: var(--ink-faint);
 }
 
 .task-card__meta .dot {
-  color: #cbd5d1;
+  color: rgba(120, 150, 140, 0.35);
 }
 
 .task-card__meta .meta-done {
@@ -406,17 +360,17 @@ async function confirmDelete() {
 
 .task-card__actions {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex-shrink: 0;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
 }
 
 .act {
   border: 1px solid var(--line);
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.7);
   color: var(--ink-soft);
-  font-size: 12.5px;
-  padding: 6px 14px;
+  font-size: 13px;
+  padding: 7px 16px;
   border-radius: 999px;
   cursor: pointer;
   transition: all 0.18s;
@@ -426,27 +380,34 @@ async function confirmDelete() {
 .act:hover {
   border-color: var(--accent);
   color: var(--accent-deep);
+  background: var(--accent-soft);
 }
 
 .act--done {
-  border-color: #bfe6dc;
+  border-color: var(--accent);
   color: var(--accent-deep);
   background: var(--accent-soft);
 }
 
 .act--done:hover {
-  background: var(--accent);
+  background: var(--accent-deep);
+  border-color: var(--accent-deep);
   color: #fff;
 }
 
+.act--danger {
+  color: var(--danger);
+  border-color: rgba(217, 119, 106, 0.22);
+}
+
 .act--danger:hover {
-  border-color: #ffd9c2;
+  border-color: rgba(217, 119, 106, 0.4);
   color: var(--danger);
   background: var(--danger-soft);
 }
 
 .act--danger-solid {
-  border-color: #f3b3a3;
+  border-color: rgba(217, 119, 106, 0.4);
   color: var(--danger);
   background: var(--danger-soft);
 }
@@ -466,10 +427,12 @@ async function confirmDelete() {
   color: var(--ink-faint);
   font-size: 14px;
   text-align: center;
-  padding: 36px 0;
+  padding: 44px 0;
   background: var(--surface);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
   border: 1px dashed var(--line);
-  border-radius: 14px;
+  border-radius: var(--radius);
 }
 
 /* ---------- 弹窗 ---------- */
@@ -477,7 +440,7 @@ async function confirmDelete() {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: rgba(23, 50, 44, 0.45);
+  background: rgba(96, 128, 118, 0.32);
   backdrop-filter: blur(3px);
   display: grid;
   place-items: center;
@@ -487,17 +450,17 @@ async function confirmDelete() {
 
 .modal {
   width: min(400px, 100%);
-  background: var(--surface);
+  background: var(--surface-solid);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-md);
-  padding: 24px;
+  box-shadow: 0 30px 60px -30px rgba(96, 128, 118, 0.45);
+  padding: 26px;
   animation: pop 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .modal__title {
   font-size: 17px;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--ink);
   margin-bottom: 10px;
 }
@@ -554,19 +517,9 @@ async function confirmDelete() {
   100% { transform: scale(1); }
 }
 
-@media (max-width: 640px) {
-  .task-card {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .task-card__actions {
-    flex-direction: row;
-    justify-content: flex-end;
-  }
-
-  .task-card__reward {
-    margin-left: 0;
+@media (max-width: 680px) {
+  .task-list {
+    grid-template-columns: 1fr;
   }
 }
 </style>

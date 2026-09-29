@@ -1,23 +1,45 @@
-/* ---------- 设计变量 ---------- */
+/* ---------- 设计变量：清新淡雅 · 低饱和度 · 轻盈通透 ---------- */
 :root {
-  --ink: #17322c;
-  --ink-soft: #5b7a72;
-  --ink-faint: #8aa59d;
-  --surface: #ffffff;
-  --canvas: #f2f8f5;
-  --line: #e2ede8;
-  --accent: #16a085;
-  --accent-deep: #0f7f68;
-  --accent-soft: #e6f5f0;
-  --danger: #c2410c;
-  --danger-soft: #fff3ec;
-  --ok: #15803d;
-  --ok-soft: #eefaf1;
-  --radius: 18px;
-  --shadow-sm: 0 1px 2px rgba(23, 50, 44, 0.05);
-  --shadow-md: 0 12px 32px -12px rgba(23, 50, 44, 0.14);
+  --ink: #455651;
+  --ink-soft: #73887f;
+  --ink-faint: #a4b6af;
+  --surface: rgba(255, 255, 255, 0.6);
+  --surface-solid: #ffffff;
+  --canvas: #f1f6f2;
+  --line: rgba(120, 150, 140, 0.14);
+  --accent: #79b8a6;
+  --accent-deep: #4f948a;
+  --accent-soft: rgba(121, 183, 166, 0.16);
+  --danger: #d9776a;
+  --danger-soft: rgba(217, 119, 106, 0.13);
+  --ok: #5fae86;
+  --ok-soft: rgba(95, 174, 134, 0.14);
+  --radius: 26px;
+  --shadow-sm: 0 4px 18px -12px rgba(96, 128, 118, 0.22);
+  --shadow-md: 0 18px 44px -26px rgba(96, 128, 118, 0.34);
   --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
     Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-serif: 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'STSong',
+    'SimSun', Georgia, 'Times New Roman', serif;
+
+  /* Element Plus 主题对齐 */
+  --el-color-primary: #79b8a6;
+  --el-color-primary-light-3: #98c8b9;
+  --el-color-primary-light-5: #b0d6ca;
+  --el-color-primary-light-7: #cbe5dc;
+  --el-color-primary-light-8: #d9ece5;
+  --el-color-primary-light-9: #ecf6f2;
+  --el-color-primary-dark-2: #589a8b;
+  --el-text-color-primary: #455651;
+  --el-text-color-regular: #73887f;
+  --el-text-color-secondary: #a4b6af;
+  --el-border-color: rgba(120, 150, 140, 0.18);
+  --el-border-color-light: rgba(120, 150, 140, 0.14);
+  --el-border-color-lighter: rgba(120, 150, 140, 0.1);
+  --el-fill-color-light: rgba(255, 255, 255, 0.55);
+  --el-fill-color-blank: rgba(255, 255, 255, 0.6);
+  --el-bg-color: rgba(255, 255, 255, 0.6);
+  --el-border-radius-base: 12px;
 }
 
 * {
@@ -31,10 +53,18 @@ body {
   height: 100%;
 }
 
+/* 全局弥散渐变背景：淡暖粉 → 浅薄荷青 + 微弱光斑 */
 body {
   font-family: var(--font);
+  font-weight: 300;
   color: var(--ink);
-  background: var(--canvas);
+  background:
+    radial-gradient(38% 30% at 16% 10%, rgba(255, 203, 201, 0.5) 0%, transparent 70%),
+    radial-gradient(34% 30% at 84% 6%, rgba(178, 224, 206, 0.55) 0%, transparent 70%),
+    radial-gradient(46% 40% at 74% 84%, rgba(199, 231, 218, 0.45) 0%, transparent 72%),
+    radial-gradient(40% 32% at 6% 80%, rgba(245, 208, 186, 0.42) 0%, transparent 70%),
+    linear-gradient(160deg, #fae9ec 0%, #f6efe6 44%, #e4f1ec 100%);
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -47,87 +77,66 @@ button {
   font-family: inherit;
 }
 
-/* ---------- 认证页：整幅背景图 + 右侧居中表单 ---------- */
+/* 页面大标题：粗衬线字体 */
+h1 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+}
+
+/* ---------- 认证页：居中布局，背景由 body 提供 ---------- */
 .auth-page {
   position: relative;
   isolation: isolate;
   min-height: 100vh;
   min-height: 100svh;
-  display: grid;
-  justify-items: end;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: clamp(20px, 5vw, 48px) clamp(20px, 6vw, 88px);
+  justify-content: center;
+  padding: clamp(24px, 5vw, 56px) 20px;
   overflow-x: hidden;
-  /* 图片加载失败时也不会出现空白背景 */
-  background: linear-gradient(150deg, #0b3d33 0%, #12796a 48%, #7cc4b0 100%);
-}
-
-.auth-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  z-index: -2;
-  pointer-events: none;
-  animation: kenburns 26s ease-in-out infinite alternate;
-}
-
-.auth-page::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(70% 62% at 78% 50%, rgba(6, 38, 32, 0.5) 0%, rgba(6, 38, 32, 0.22) 60%, transparent 100%),
-    linear-gradient(100deg, rgba(6, 38, 32, 0.34) 0%, rgba(15, 127, 104, 0.24) 45%, rgba(6, 38, 32, 0.5) 100%);
 }
 
 .auth-brand {
-  position: absolute;
-  top: clamp(18px, 3.5vw, 30px);
-  left: clamp(18px, 3.5vw, 34px);
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  color: #fff;
+  color: var(--ink);
   font-size: 15px;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  text-shadow: 0 1px 10px rgba(6, 38, 32, 0.45);
+  letter-spacing: 0.03em;
+  margin-bottom: 26px;
 }
 
 .auth-brand__dot {
-  width: 28px;
-  height: 28px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.94);
-  color: var(--accent-deep);
+  width: 30px;
+  height: 30px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #8fc9b8, #79b8a6);
+  color: #fff;
   display: grid;
   place-items: center;
-  font-size: 13px;
-  font-weight: 700;
+  box-shadow: 0 8px 18px -8px rgba(79, 148, 138, 0.7);
 }
 
 .auth-card {
   position: relative;
   width: 100%;
-  max-width: 404px;
-  background: rgba(255, 255, 255, 0.93);
-  backdrop-filter: blur(16px) saturate(1.1);
-  -webkit-backdrop-filter: blur(16px) saturate(1.1);
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  border-radius: 22px;
-  padding: clamp(28px, 4vw, 40px) clamp(22px, 4vw, 34px);
-  box-shadow: 0 30px 70px -30px rgba(6, 38, 32, 0.6), var(--shadow-sm);
+  max-width: 424px;
+  background: var(--surface);
+  backdrop-filter: blur(22px) saturate(1.25);
+  -webkit-backdrop-filter: blur(22px) saturate(1.25);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 30px;
+  padding: clamp(30px, 4vw, 44px) clamp(24px, 4vw, 38px);
+  box-shadow: 0 26px 60px -34px rgba(96, 128, 118, 0.5), var(--shadow-sm);
   animation: cardIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both;
 }
 
 @keyframes cardIn {
   from {
     opacity: 0;
-    transform: translateX(24px);
+    transform: translateY(18px);
   }
   to {
     opacity: 1;
@@ -135,9 +144,9 @@ button {
   }
 }
 
-/* 注册页字段较多，压缩纵向节奏让卡片在常见视口内完整显示 */
+/* 注册页字段较多，压缩纵向节奏 */
 .auth-card--compact {
-  padding: clamp(22px, 3vw, 28px) clamp(22px, 4vw, 34px);
+  padding: clamp(24px, 3vw, 32px) clamp(24px, 4vw, 36px);
 }
 
 .auth-card--compact .subtitle {
@@ -149,11 +158,11 @@ button {
 }
 
 .auth-card--compact .form-item input {
-  height: 42px;
+  height: 44px;
 }
 
 .auth-card--compact .btn {
-  height: 42px;
+  height: 44px;
   margin-top: 2px;
 }
 
@@ -162,15 +171,18 @@ button {
 }
 
 .auth-card > h2 {
-  font-size: 26px;
-  font-weight: 650;
-  letter-spacing: -0.01em;
+  font-family: var(--font-serif);
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   margin-bottom: 6px;
+  color: var(--ink);
 }
 
 .auth-card .subtitle {
   color: var(--ink-soft);
-  font-size: 14.5px;
+  font-size: 14px;
+  font-weight: 400;
   margin-bottom: 30px;
 }
 
@@ -198,9 +210,9 @@ button {
 .form-item label {
   display: block;
   font-size: 13px;
-  font-weight: 550;
+  font-weight: 500;
   margin-bottom: 7px;
-  color: var(--ink);
+  color: var(--ink-soft);
 }
 
 .form-item label .hint {
@@ -210,51 +222,54 @@ button {
 
 .form-item input {
   width: 100%;
-  height: 46px;
-  padding: 0 14px;
+  height: 48px;
+  padding: 0 16px;
   border: 1px solid var(--line);
-  border-radius: 12px;
-  font-size: 14.5px;
+  border-radius: 14px;
+  font-size: 14px;
   font-family: inherit;
+  font-weight: 400;
   color: var(--ink);
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.7);
   outline: none;
   transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
 }
 
 .form-item input::placeholder {
-  color: #a9bcb6;
+  color: #b7c6c0;
 }
 
 .form-item input:hover {
-  border-color: #c9ddd6;
+  border-color: rgba(120, 150, 140, 0.28);
 }
 
 .form-item input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(22, 160, 133, 0.12);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+  background: #ffffff;
 }
 
 .btn {
   width: 100%;
-  height: 46px;
+  height: 48px;
   margin-top: 6px;
-  border: none;
-  border-radius: 12px;
-  background: var(--accent);
+  border: 1px solid rgba(121, 183, 166, 0.5);
+  border-radius: 999px;
+  background: rgba(121, 183, 166, 0.9);
   color: #fff;
   font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   cursor: pointer;
-  box-shadow: 0 8px 20px -10px rgba(22, 160, 133, 0.7);
-  transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
+  box-shadow: 0 14px 28px -16px rgba(79, 148, 138, 0.7);
+  transition: background 0.18s, transform 0.18s, box-shadow 0.18s, border-color 0.18s;
 }
 
 .btn:hover:not(:disabled) {
-  background: var(--accent-deep);
+  background: #79b8a6;
+  border-color: #79b8a6;
   transform: translateY(-1px);
-  box-shadow: 0 12px 24px -10px rgba(15, 127, 104, 0.7);
+  box-shadow: 0 18px 32px -16px rgba(79, 148, 138, 0.75);
 }
 
 .btn:active:not(:disabled) {
@@ -269,8 +284,8 @@ button {
 
 .msg {
   padding: 11px 14px;
-  border-radius: 12px;
-  font-size: 13.5px;
+  border-radius: 14px;
+  font-size: 13px;
   line-height: 1.5;
   margin-bottom: 18px;
   animation: rise 0.28s ease both;
@@ -279,31 +294,32 @@ button {
 .msg.error {
   background: var(--danger-soft);
   color: var(--danger);
-  border: 1px solid #ffd9c2;
+  border: 1px solid rgba(217, 119, 106, 0.22);
 }
 
 .msg.success {
   background: var(--ok-soft);
   color: var(--ok);
-  border: 1px solid #cdeed8;
+  border: 1px solid rgba(95, 174, 134, 0.22);
 }
 
 .switch-link {
   text-align: center;
   margin-top: 24px;
-  font-size: 14px;
+  font-size: 13.5px;
   color: var(--ink-soft);
 }
 
 .switch-link a {
-  font-weight: 600;
+  font-weight: 500;
+  color: var(--accent-deep);
 }
 
 .switch-link a:hover {
   text-decoration: underline;
 }
 
-/* 入场序列：卡片先落位，内容再依次浮现 */
+/* 入场序列 */
 .stagger > * {
   animation: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -328,32 +344,44 @@ button {
   }
 }
 
-@keyframes kenburns {
-  from {
-    transform: scale(1.04) translate3d(0, 0, 0);
-  }
-  to {
-    transform: scale(1.12) translate3d(-1.5%, -1.5%, 0);
-  }
+/* ---------- Element Plus 轻量化覆盖 ---------- */
+.el-card {
+  --el-card-bg-color: var(--surface);
+  background: var(--surface);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 24px;
+  box-shadow: var(--shadow-sm);
 }
 
-/* 小屏：回到居中，表单占满宽度，品牌标识缩小 */
-@media (max-width: 560px) {
-  .auth-page {
-    justify-items: center;
-    padding: 76px 16px 28px;
-  }
+.el-tag {
+  border-radius: 999px;
+  font-weight: 500;
+}
 
-  .auth-card {
-    max-width: none;
-    border-radius: 18px;
-  }
+.el-button {
+  font-weight: 500;
+  border-radius: 999px;
+}
 
-  .auth-brand {
-    top: 18px;
-    left: 18px;
-    font-size: 14px;
-  }
+.el-input__wrapper {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 1px var(--line) !important;
+}
+
+.el-input__wrapper.is-focus {
+  box-shadow: inset 0 0 0 1px var(--accent), 0 0 0 4px var(--accent-soft) !important;
+}
+
+.el-timeline-item__tail {
+  border-left: 1px solid rgba(120, 150, 140, 0.18);
+}
+
+.el-alert {
+  border-radius: 14px;
+  border: 1px solid rgba(120, 150, 140, 0.14);
 }
 
 @media (prefers-reduced-motion: reduce) {
