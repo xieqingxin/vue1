@@ -12,6 +12,7 @@
 
         <nav class="nav">
           <button class="nav__link" :class="{ active: true }" @click="router.push('/home')">首页</button>
+          <button class="nav__link" @click="router.push('/teams')">团队</button>
           <button class="nav__link" @click="router.push('/announcements')">公告</button>
           <button class="nav__link" @click="router.push('/about')">关于</button>
           <span class="nav__divider" aria-hidden="true"></span>

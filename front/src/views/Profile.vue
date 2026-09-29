@@ -33,7 +33,7 @@
       <!-- 任务统计 -->
       <section class="stats">
         <div class="stat">
-          <span class="stat__num">{{ tasks.length }}</span>
+          <span class="stat__num">{{ allCount }}</span>
           <span class="stat__label">全部任务</span>
         </div>
         <div class="stat">
@@ -49,6 +49,10 @@
           <span class="stat__label">已过期</span>
         </div>
       </section>
+      <div class="stats-legend">
+        <span class="legend-item"><span class="legend-flower">🌸</span>个人 {{ tasks.length }} 项</span>
+        <span class="legend-item"><span class="legend-flower">👥</span>团队 {{ teamTasks.length }} 项</span>
+      </div>
 
       <!-- 完成日历 -->
       <section class="calendar">
@@ -61,7 +65,8 @@
           </div>
         </div>
         <div class="calendar__legend">
-          <span class="legend-item"><span class="legend-flower">🌸</span>当天有任务完成</span>
+          <span class="legend-item"><span class="legend-flower">🌸</span>个人完成</span>
+          <span class="legend-item"><span class="legend-flower">👥</span>团队完成</span>
           <span class="legend-count" v-if="monthDoneCount">本月完成 {{ monthDoneCount }} 项</span>
         </div>
         <div class="calendar__grid">
@@ -70,12 +75,15 @@
             v-for="cell in cells"
             :key="cell.key"
             class="calendar__cell"
-            :class="{ blank: !cell.day, today: cell.isToday, 'has-flower': cell.done > 0 }"
+            :class="{ blank: !cell.day, today: cell.isToday, 'has-flower': cell.done > 0 || cell.teamDone > 0 }"
           >
             <template v-if="cell.day">
               <span class="calendar__day">{{ cell.day }}</span>
-              <span v-if="cell.done > 0" class="calendar__flower" :title="'完成 ' + cell.done + ' 项任务'">🌸</span>
-              <span v-else class="calendar__flower calendar__flower--ghost"></span>
+              <span class="calendar__marks">
+                <span v-if="cell.done > 0" class="calendar__flower" :title="'完成 ' + cell.done + ' 项个人任务'">🌸</span>
+                <span v-if="cell.teamDone > 0" class="calendar__flower calendar__flower--team" :title="'完成 ' + cell.teamDone + ' 项团队任务'">👥</span>
+              </span>
+              <span v-if="!cell.done && !cell.teamDone" class="calendar__flower calendar__flower--ghost"></span>
             </template>
           </div>
         </div>
@@ -88,6 +96,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { listTasks } from '../api/user'
+import { listMyTeamTasks } from '../api/team'
 import { useUserStore } from '../store/user'
 
 const router = useRouter()
@@ -95,6 +104,7 @@ const store = useUserStore()
 
 const user = ref(store.user)
 const tasks = ref([])
+const teamTasks = ref([])
 const loadError = ref('')
 
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六']
@@ -108,16 +118,43 @@ const initial = computed(() => {
   return name ? name.charAt(0).toUpperCase() : '?'
 })
 
-const doingCount = computed(() => tasks.value.filter((t) => t.status === 0).length)
-const doneCount = computed(() => tasks.value.filter((t) => t.status === 1).length)
-const expiredCount = computed(() => tasks.value.filter((t) => t.status === 2).length)
+function isPast(t) {
+  if (!t || !t.endTime) return false
+  return new Date(String(t.endTime).replace('T', ' ').replace(/-/g, '/')).getTime() < Date.now()
+}
 
-// 按日期聚合完成数量：'YYYY-MM-DD' -> count
-const doneByDate = computed(() => {
+// 个人任务计数
+const personalDoing = computed(() => tasks.value.filter((t) => t.status === 0).length)
+const personalDone = computed(() => tasks.value.filter((t) => t.status === 1).length)
+const personalExpired = computed(() => tasks.value.filter((t) => t.status === 2).length)
+
+// 团队任务计数（个人是否完成 + 是否过期）
+const teamDone = computed(() => teamTasks.value.filter((t) => Number(t.myCompleted) === 1).length)
+const teamDoing = computed(() => teamTasks.value.filter((t) => Number(t.myCompleted) !== 1 && !isPast(t)).length)
+const teamExpired = computed(() => teamTasks.value.filter((t) => Number(t.myCompleted) !== 1 && isPast(t)).length)
+
+const allCount = computed(() => tasks.value.length + teamTasks.value.length)
+const doingCount = computed(() => personalDoing.value + teamDoing.value)
+const doneCount = computed(() => personalDone.value + teamDone.value)
+const expiredCount = computed(() => personalExpired.value + teamExpired.value)
+
+// 按日期聚合完成数量：'YYYY-MM-DD' -> count（个人 / 团队分开）
+const personalDoneByDate = computed(() => {
   const map = {}
   for (const t of tasks.value) {
     if (t.status === 1 && t.completedAt) {
       const key = String(t.completedAt).slice(0, 10)
+      map[key] = (map[key] || 0) + 1
+    }
+  }
+  return map
+})
+
+const teamDoneByDate = computed(() => {
+  const map = {}
+  for (const t of teamTasks.value) {
+    if (Number(t.myCompleted) === 1 && t.myCompleteTime) {
+      const key = String(t.myCompleteTime).slice(0, 10)
       map[key] = (map[key] || 0) + 1
     }
   }
@@ -135,21 +172,22 @@ const cells = computed(() => {
   const daysInMonth = new Date(y, m + 1, 0).getDate()
   const list = []
   for (let i = 0; i < firstWeekday; i++) {
-    list.push({ key: `b${i}`, day: 0, done: 0, isToday: false })
+    list.push({ key: `b${i}`, day: 0, done: 0, teamDone: 0, isToday: false })
   }
   for (let d = 1; d <= daysInMonth; d++) {
     const key = `${y}-${pad(m + 1)}-${pad(d)}`
     list.push({
       key,
       day: d,
-      done: doneByDate.value[key] || 0,
+      done: personalDoneByDate.value[key] || 0,
+      teamDone: teamDoneByDate.value[key] || 0,
       isToday: y === today.getFullYear() && m === today.getMonth() && d === today.getDate()
     })
   }
   return list
 })
 
-const monthDoneCount = computed(() => cells.value.reduce((s, c) => s + c.done, 0))
+const monthDoneCount = computed(() => cells.value.reduce((s, c) => s + c.done + c.teamDone, 0))
 
 function prevMonth() {
   if (month.value === 0) {
@@ -181,8 +219,9 @@ function goBack() {
 async function load() {
   loadError.value = ''
   try {
-    const res = await listTasks()
-    tasks.value = res.data || []
+    const [personalRes, teamRes] = await Promise.all([listTasks(), listMyTeamTasks()])
+    tasks.value = personalRes.data || []
+    teamTasks.value = teamRes.data || []
   } catch (e) {
     loadError.value = e.message
   }
@@ -379,6 +418,23 @@ onMounted(() => {
   color: var(--ink-faint);
 }
 
+/* 个人/团队统计说明 */
+.stats-legend {
+  margin-top: 12px;
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.14s both;
+}
+
+.stats-legend .legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
 /* ---------- 完成日历 ---------- */
 .calendar {
   margin-top: 22px;
@@ -531,6 +587,12 @@ onMounted(() => {
 .calendar__flower {
   font-size: 13px;
   line-height: 1;
+}
+
+.calendar__marks {
+  display: inline-flex;
+  gap: 2px;
+  justify-content: center;
 }
 
 .calendar__flower--ghost {

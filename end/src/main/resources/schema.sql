@@ -52,3 +52,63 @@ CREATE TABLE IF NOT EXISTS `task` (
 -- ALTER TABLE `task` ADD COLUMN `completed_at` DATETIME DEFAULT NULL COMMENT '完成时间' AFTER `status`;
 -- ALTER TABLE `task` MODIFY COLUMN `status` TINYINT NOT NULL DEFAULT 0 COMMENT '完成状态：0-进行中 1-已完成 2-已过期';
 -- ALTER TABLE `task` MODIFY COLUMN `reward` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '完成奖励';
+
+-- =====================================================================
+-- 团队功能相关表（团队、成员、团队任务、指派、完成记录）
+-- 已有数据库请手动执行以下 5 条 CREATE TABLE 语句
+-- =====================================================================
+
+CREATE TABLE IF NOT EXISTS `team` (
+    `id`          BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `name`        VARCHAR(64) NOT NULL COMMENT '团队名称',
+    `leader_id`   BIGINT      NOT NULL COMMENT '队长用户 ID',
+    `max_size`    INT         NOT NULL DEFAULT 30 COMMENT '最大人数（创建后不可改）',
+    `category`    VARCHAR(20) NOT NULL DEFAULT 'other' COMMENT '团队分类：exercise/work/study/life/other',
+    `status`      VARCHAR(16) NOT NULL DEFAULT 'normal' COMMENT 'normal-正常 dissolved-已解散',
+    `create_time` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_leader` (`leader_id`),
+    KEY `idx_category` (`category`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT ='团队表';
+
+CREATE TABLE IF NOT EXISTS `team_member` (
+    `team_id`   BIGINT      NOT NULL COMMENT '团队 ID',
+    `user_id`   BIGINT      NOT NULL COMMENT '用户 ID',
+    `role`      VARCHAR(16) NOT NULL DEFAULT 'member' COMMENT 'leader-队长 member-成员',
+    `status`    VARCHAR(16) NOT NULL DEFAULT 'pending' COMMENT 'pending-待审核 approved-已通过 rejected-已拒绝',
+    `join_time` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '加入/申请时间',
+    PRIMARY KEY (`team_id`, `user_id`),
+    KEY `idx_user` (`user_id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT ='团队成员表（含申请审核）';
+
+CREATE TABLE IF NOT EXISTS `team_task` (
+    `id`             BIGINT        NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `team_id`        BIGINT        NOT NULL COMMENT '团队 ID',
+    `assignee_type`  VARCHAR(16)   NOT NULL DEFAULT 'all' COMMENT 'all-全员 assigned-指定',
+    `name`           VARCHAR(100)  NOT NULL COMMENT '任务名',
+    `content`        VARCHAR(1000) DEFAULT NULL COMMENT '任务内容',
+    `type`           VARCHAR(20)   NOT NULL DEFAULT 'other' COMMENT '任务类型',
+    `start_time`     DATETIME      NOT NULL COMMENT '开始时间',
+    `end_time`       DATETIME      NOT NULL COMMENT '结束时间',
+    `reward`         VARCHAR(100)  NOT NULL DEFAULT '' COMMENT '完成奖励',
+    `creator_id`     BIGINT        NOT NULL COMMENT '创建者（队长）ID',
+    `overall_status` VARCHAR(16)   NOT NULL DEFAULT 'ongoing' COMMENT '整体状态：ongoing-进行中 completed-已完成（不可回退）',
+    `is_deleted`     TINYINT       NOT NULL DEFAULT 0 COMMENT '软删除：0-否 1-是',
+    `create_time`    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_team` (`team_id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT ='团队任务表';
+
+CREATE TABLE IF NOT EXISTS `team_task_assignee` (
+    `task_id` BIGINT NOT NULL COMMENT '任务 ID',
+    `user_id` BIGINT NOT NULL COMMENT '被指派用户 ID',
+    PRIMARY KEY (`task_id`, `user_id`),
+    KEY `idx_user` (`user_id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT ='团队任务指派表';
+
+CREATE TABLE IF NOT EXISTS `team_task_completion` (
+    `task_id`       BIGINT   NOT NULL COMMENT '任务 ID',
+    `user_id`       BIGINT   NOT NULL COMMENT '完成成员 ID',
+    `complete_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '完成时间',
+    PRIMARY KEY (`task_id`, `user_id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT ='团队任务完成记录表';
